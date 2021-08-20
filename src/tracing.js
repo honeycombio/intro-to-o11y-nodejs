@@ -1,3 +1,6 @@
+const { DiagConsoleLogger, DiagLogLevel, diag } = require("@opentelemetry/api");
+diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.DEBUG);
+
 // import otel dependencies
 const opentelemetry = require("@opentelemetry/api");
 const { ConsoleLogger, HttpTraceContextPropagator } = require("@opentelemetry/core");
@@ -20,29 +23,32 @@ const {
 
 module.exports = () => {
   // set up exporter options
+  opentelemetry.diag.setLogger(new opentelemetry.DiagConsoleLogger(), opentelemetry.DiagLogLevel.DEBUG);
 
   const provider = new NodeTracerProvider();
 
   const metadata = new grpc.Metadata();
-  console.log("Setting API key to " + process.env.HONEYCOMB_API_KEY)
+ // console.log("Setting API key to " + process.env.HONEYCOMB_API_KEY)
   metadata.set("x-honeycomb-team", process.env.HONEYCOMB_API_KEY);
   metadata.set(
     "x-honeycomb-dataset",
     process.env.HONEYCOMB_DATASET || "otel-nodejs"
   );
+  const creds = false;
+  console.log(creds);
   provider.addSpanProcessor(
-    new SimpleSpanProcessor(
+    new BatchSpanProcessor(
       new CollectorTraceExporter({
         serviceName: "otel-nodejs",
-        url: "api.honeycomb.io:443",
-        credentials: grpc.credentials.createSsl(),
+        url: "grpcs://api.honeycomb.io:443/",
+        credentials: creds,
         metadata
       })
     )
   );
 
   // uncomment this to see traces in the log
-  //provider.addSpanProcessor(new SimpleSpanProcessor(new ConsoleSpanExporter()));
+ //provider.addSpanProcessor(new SimpleSpanProcessor(new ConsoleSpanExporter()));
 
   /*
    This part exists because Glitch is a Honeycomb customer,
@@ -70,7 +76,7 @@ module.exports = () => {
   /*
   end special handling for Glitch
   */
-
+  
   // turn on autoinstrumentation for traces you're likely to want
   registerInstrumentations({
     tracerProvider: provider,
