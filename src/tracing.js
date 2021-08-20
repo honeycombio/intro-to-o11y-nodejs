@@ -24,6 +24,7 @@ module.exports = () => {
   const provider = new NodeTracerProvider();
 
   const metadata = new grpc.Metadata();
+  console.log("Setting API key to " + process.env.HONEYCOMB_API_KEY)
   metadata.set("x-honeycomb-team", process.env.HONEYCOMB_API_KEY);
   metadata.set(
     "x-honeycomb-dataset",
@@ -41,7 +42,7 @@ module.exports = () => {
   );
 
   // uncomment this to see traces in the log
- //provider.addSpanProcessor(new SimpleSpanProcessor(new ConsoleSpanExporter()));
+  //provider.addSpanProcessor(new SimpleSpanProcessor(new ConsoleSpanExporter()));
 
   /*
    This part exists because Glitch is a Honeycomb customer,
@@ -69,7 +70,7 @@ module.exports = () => {
   /*
   end special handling for Glitch
   */
-  
+
   // turn on autoinstrumentation for traces you're likely to want
   registerInstrumentations({
     tracerProvider: provider,

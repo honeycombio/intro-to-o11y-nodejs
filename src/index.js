@@ -1,3 +1,4 @@
+require('dotenv').config()
 const tracer = require("./tracing")();
 const otel = require("@opentelemetry/api");
 
@@ -38,7 +39,7 @@ app.get("/fib", async (req, res) => {
 });
 
 function calculateFibonacciNumber(previous, oneBeforeThat) {
- // let tracer = otel.trace.getTracer("foo-microservice");
+  // let tracer = otel.trace.getTracer("foo-microservice");
   let span = tracer.startSpan("calculation");
   const result = previous + oneBeforeThat;
   span.end();
