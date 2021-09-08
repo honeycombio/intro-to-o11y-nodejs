@@ -15,7 +15,7 @@ const {
   ExpressInstrumentation
 } = require("@opentelemetry/instrumentation-express");
 const { registerInstrumentations } = require("@opentelemetry/instrumentation");
-const grpc = require("@grpc/grpc-js");
+const grpc = require("@opentelemetry/exporter-collector-grpc/node_modules/@grpc/grpc-js");
 
 const {
   CollectorTraceExporter
@@ -23,7 +23,7 @@ const {
 
 module.exports = () => {
   // uncomment this to debug the tracing setup
-  // opentelemetry.diag.setLogger(new opentelemetry.DiagConsoleLogger(), opentelemetry.DiagLogLevel.DEBUG);
+  opentelemetry.diag.setLogger(new opentelemetry.DiagConsoleLogger(), opentelemetry.DiagLogLevel.DEBUG);
 
   const provider = new NodeTracerProvider();
 
@@ -38,7 +38,7 @@ module.exports = () => {
     new BatchSpanProcessor(
       new CollectorTraceExporter({
         serviceName: "otel-nodejs",
-        url: "grpcs://api.honeycomb.io:443/",
+        url: "grpc://api.honeycomb.io:443/",
         credentials: false,
         metadata
       })
