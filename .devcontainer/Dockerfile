@@ -14,3 +14,10 @@ FROM mcr.microsoft.com/vscode/devcontainers/javascript-node:0-${VARIANT}
 
 # [Optional] Uncomment if you want to install more global node modules
 # RUN su node -c "npm install -g <your-package-list-here>"
+
+
+# let's install the collector!
+
+# see package.json:scripts.metrics for how to run it
+RUN wget https://github.com/honeycombio/opentelemetry-collector-configs/releases/download/v1.2.0/otelcol_hny_linux_amd64
+RUN wget https://github.com/honeycombio/opentelemetry-collector-configs/releases/download/v1.2.0/honeycomb-metrics-config.yaml
