@@ -32,7 +32,7 @@ function indicateLoading() {
   return loadingSpan;
 }
 
-const unicodeStop = "⯃";
+const unicodeStop = "\u{1F6D1}";
 function indicateStop() {
   return document.createTextNode(unicodeStop);
 }

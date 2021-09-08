@@ -16,16 +16,23 @@ const {
 } = require("@opentelemetry/instrumentation-express");
 const { registerInstrumentations } = require("@opentelemetry/instrumentation");
 const grpc = require("@opentelemetry/exporter-collector-grpc/node_modules/@grpc/grpc-js");
+const { Resource } = require('@opentelemetry/resources');
+const { SemanticResourceAttributes } = require('@opentelemetry/semantic-conventions');
+
 
 const {
   CollectorTraceExporter
 } = require("@opentelemetry/exporter-collector-grpc");
 
 module.exports = () => {
-  // uncomment this to debug the tracing setup
-  opentelemetry.diag.setLogger(new opentelemetry.DiagConsoleLogger(), opentelemetry.DiagLogLevel.DEBUG);
+  // set up exporter options
+  // opentelemetry.diag.setLogger(new opentelemetry.DiagConsoleLogger(), opentelemetry.DiagLogLevel.DEBUG);
 
-  const provider = new NodeTracerProvider();
+  const provider = new NodeTracerProvider({
+    resource: new Resource({
+      [SemanticResourceAttributes.SERVICE_NAME]: process.env.SERVICE_NAME || 'fibonacci-microservice',
+    }),
+  });
 
   const metadata = new grpc.Metadata();
   // console.log("Setting API key to " + process.env.HONEYCOMB_API_KEY)
@@ -34,12 +41,12 @@ module.exports = () => {
     "x-honeycomb-dataset",
     process.env.HONEYCOMB_DATASET || "otel-nodejs"
   );
+  const creds = grpc.credentials.createSsl();
   provider.addSpanProcessor(
     new BatchSpanProcessor(
       new CollectorTraceExporter({
-        serviceName: "otel-nodejs",
-        url: "grpc://api.honeycomb.io:443/",
-        credentials: false,
+        url: "grpcs://api.honeycomb.io:443/",
+        credentials: creds,
         metadata
       })
     )

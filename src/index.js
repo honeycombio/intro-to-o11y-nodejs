@@ -1,6 +1,7 @@
-require('dotenv').config()
-const tracer = require("./tracing")();
-const otel = require("@opentelemetry/api");
+require('dotenv').config();
+const tracer = require("./tracing")(); // turn on tracing
+
+const otel = require("@opentelemetry/api"); // get access to the current span
 
 const express = require("express");
 const http = require("http");
@@ -17,6 +18,7 @@ app.get("/sequence.js", (req, res) => {
 app.get("/fib", async (req, res) => {
   let initialValue = parseInt(req.query.index);
 
+  // populate a custom attribute on the current span
   const span = otel.trace.getSpan(otel.context.active());
   span.setAttribute("parameter.index", initialValue);
 
@@ -33,16 +35,14 @@ app.get("/fib", async (req, res) => {
       `http://127.0.0.1:3000/fib?index=${initialValue - 2}`
     );
     returnValue = calculateFibonacciNumber(minusOneReturn, minusTwoReturn);
-    // span.setAttribute("response.fibonacciNumber", returnValue)
   }
+  // maybe add the return value as a custom attribute too?
   res.send(returnValue.toString());
 });
 
 function calculateFibonacciNumber(previous, oneBeforeThat) {
-  // let tracer = otel.trace.getTracer("foo-microservice");
-  let span = tracer.startSpan("calculation");
+  // can you wrap this next line in a custom span?
   const result = previous + oneBeforeThat;
-  span.end();
   return previous + oneBeforeThat;
 }
 
