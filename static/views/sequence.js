@@ -69,7 +69,7 @@ function addNumbersToSequence(startingIndex) {
         console.log("ok for " + i);
         response.json().then(
           n => {
-            placeToPutThisNumber.replaceChildren(formatFibonacciNumber(n));
+            placeToPutThisNumber.replaceChildren(formatFibonacciNumber(n.fibonacciNumber));
             addNumbersToSequenceInternal(i + 1);
           },
           err => {
