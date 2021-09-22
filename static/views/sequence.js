@@ -13,8 +13,8 @@ function formatFibonacciNumber(n) {
   numberSpan.appendChild(document.createTextNode(n));
 
   const separatorSpan = document.createElement("span");
-  numberSpan.classList.add("separator");
-  numberSpan.appendChild(document.createTextNode(", "));
+  separatorSpan.classList.add("separator");
+  separatorSpan.appendChild(document.createTextNode(", "));
   container.appendChild(numberSpan);
   container.appendChild(separatorSpan);
   return container;
@@ -25,61 +25,96 @@ function indicateError() {
   return document.createTextNode(unicodeBomb);
 }
 
-const unicodeEllipsis = "…"
+const unicodeEllipsis = "…";
 function indicateLoading() {
   const loadingSpan = document.createElement("span");
   loadingSpan.appendChild(document.createTextNode(unicodeEllipsis));
   return loadingSpan;
 }
 
-const unicodeStop = "\u{1F6D1}";
+const unicodeStop = "🛑";
 function indicateStop() {
   return document.createTextNode(unicodeStop);
 }
 
+function setElementName(e, nameValue) {
+  const nameAttribute = document.createAttribute("name");
+  nameAttribute.value = nameValue;
+  e.setAttributeNode(nameAttribute);
+}
+
 function addNumbersToSequence(startingIndex) {
-  const placeToPutTheNumber = document.createElement("span");
-  putNumbersHere.appendChild(placeToPutTheNumber);
+  const sequenceSpan = document.createElement("span");
+  setElementName(sequenceSpan, "sequence-results");
+  putNumbersHere.appendChild(sequenceSpan);
 
-  if (stopRequested) {
-    placeToPutTheNumber.appendChild(indicateStop());
-    console.log("stopping");
-    return;
-  }
+  function addNumbersToSequenceInternal(index) {
+    const placeToPutThisNumber = document.createElement("span");
+    setElementName(placeToPutThisNumber, "fib-of-" + index);
 
-  placeToPutTheNumber.appendChild(indicateLoading());
-
-  const i = startingIndex;
-  const url = "/fib?index=" + i;
-  fetch(url).then(response => {
-    if (response.ok) {
-      console.log("ok for " + i);
-      response
-        .json()
-        .then(n => {
-          placeToPutTheNumber.replaceChildren(formatFibonacciNumber(n));
-          addNumbersToSequence(i + 1);
-        }, err => {
-          placeToPutTheNumber.replaceChildren(indicateError());
-          console.log("parsing error on " + i);
-        });
-    } else {
-      placeToPutTheNumber.replaceChildren(indicateError());
-      console.log("error on " + i);
+    sequenceSpan.appendChild(placeToPutThisNumber);
+    if (stopRequested) {
+      placeToPutThisNumber.replaceChildren(indicateStop());
+      console.log("stopping");
+      buttonsReadyToGo();
+      return;
     }
-  });
+
+    placeToPutThisNumber.replaceChildren(indicateLoading());
+
+    const i = index;
+    const url = "/fib?index=" + i;
+    fetch(url).then(response => {
+      if (response.ok) {
+        console.log("ok for " + i);
+        response.json().then(
+          n => {
+            placeToPutThisNumber.replaceChildren(formatFibonacciNumber(n));
+            addNumbersToSequenceInternal(i + 1);
+          },
+          err => {
+            placeToPutThisNumber.replaceChildren(indicateError());
+            console.log("parsing error on " + i);
+          }
+        );
+      } else {
+        placeToPutThisNumber.replaceChildren(indicateError());
+        console.log("error on " + i);
+      }
+    });
+  }
+  addNumbersToSequenceInternal(startingIndex);
+}
+
+function buttonsReadyToGo() {
+  stopButton.textContent = "Stop";
+  goButton.disabled = false;
+  stopButton.disabled = true;
+}
+
+function buttonsReadyToStop() {
+  stopButton.textContent = "Stop";
+  stopButton.disabled = false;
+  goButton.disabled = true;
+}
+
+function buttonsWorkingOnStopping() {
+  stopButton.textContent = "Stopping...";
 }
 
 function go() {
   stopRequested = false;
   putNumbersHere.replaceChildren();
+  buttonsReadyToStop();
   addNumbersToSequence(0);
 }
-
 goButton.addEventListener("click", go);
 
 function stop() {
   console.log("I hear you. Setting stopRequested");
+  buttonsWorkingOnStopping();
   stopRequested = true;
 }
 stopButton.addEventListener("click", stop);
+
+buttonsReadyToGo();
