@@ -1,7 +1,6 @@
-require('dotenv').config();
 const tracer = require("./tracing")(); // turn on tracing
 
-const otel = require("@opentelemetry/api"); // get access to the current span
+// const otel = require("@opentelemetry/api"); // get access to the current span
 
 const express = require("express");
 const http = require("http");
@@ -16,32 +15,34 @@ app.get("/sequence.js", (req, res) => {
 });
 
 app.get("/fib", async (req, res) => {
-  let initialValue = parseInt(req.query.index);
+  let index = parseInt(req.query.index);
 
-  // populate a custom attribute on the current span
-  const span = otel.trace.getSpan(otel.context.active());
-  span.setAttribute("parameter.index", initialValue);
+// populate a custom attribute on the current span
 
   let returnValue = 0;
-  if (initialValue === 0) {
+  if (index === 0) {
     returnValue = 0;
-  } else if (initialValue === 1) {
+  } else if (index === 1) {
     returnValue = 1;
   } else {
-    let minusOneReturn = await makeRequest(
-      `http://127.0.0.1:3000/fib?index=${initialValue - 1}`
+    let minusOneResponse = await makeRequest(
+      `http://127.0.0.1:3000/fib?index=${index - 1}`
     );
-    let minusTwoReturn = await makeRequest(
-      `http://127.0.0.1:3000/fib?index=${initialValue - 2}`
-    );
-    returnValue = calculateFibonacciNumber(minusOneReturn, minusTwoReturn);
+    console.log("Response: " + minusOneResponse);
+    let minusOneParsedResponse = JSON.parse(minusOneResponse);
+    let minusTwoReturn = JSON.parse(await makeRequest(
+      `http://127.0.0.1:3000/fib?index=${index - 2}`
+    ));
+    returnValue = calculateFibonacciNumber(minusOneParsedResponse.fibonacciNumber,
+                                           minusTwoReturn.fibonacciNumber);
   }
+  const returnObject = { fibonacciNumber: returnValue, index: index }
   // maybe add the return value as a custom attribute too?
-  res.send(returnValue.toString());
+  res.send(JSON.stringify(returnObject));
 });
 
 function calculateFibonacciNumber(previous, oneBeforeThat) {
-  // can you wrap this next line in a custom span?
+ // can you wrap this next line in a custom span?
   const result = previous + oneBeforeThat;
   return previous + oneBeforeThat;
 }
@@ -54,7 +55,7 @@ function makeRequest(url) {
         data += chunk;
       });
       res.on("end", () => {
-        resolve(parseInt(data));
+        resolve(data);
       });
       res.on("error", err => {
         reject(err);

@@ -25,8 +25,9 @@ const {
 } = require("@opentelemetry/exporter-collector-grpc");
 
 module.exports = () => {
-  // set up exporter options
-  // opentelemetry.diag.setLogger(new opentelemetry.DiagConsoleLogger(), opentelemetry.DiagLogLevel.DEBUG);
+  // set log level to DEBUG for a lot of output
+  opentelemetry.diag.setLogger(new opentelemetry.DiagConsoleLogger(), 
+                               opentelemetry.DiagLogLevel.WARN);
 
   const provider = new NodeTracerProvider({
     resource: new Resource({
