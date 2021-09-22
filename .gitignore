@@ -3,3 +3,4 @@ node_modules
 .lesshst
 honeycomb-metrics-config.yaml
 otelcol_hny_linux_amd64
+.lesshst
