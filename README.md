@@ -1,9 +1,10 @@
-Intro to Observability: Demo in Node.js
-================
+# Intro to Observability: Demo in Node.js
 
 This Node.js application is here for you to try out tracing.
 It consists of a microservice that calls itself,
 so you can simulate a whole microservice ecosystem with just one service!
+
+Spoiler: this microservice implements the <a href="https://en.wikipedia.org/wiki/Fibonacci_number">Fibonacci sequence</a>.
 
 ## What to do
 
@@ -61,8 +62,8 @@ Then, anywhere in that file, you can grab the current span and add attributes.
 Put this in the request handler:
 
 ```js
-  const span = otel.trace.getSpan(otel.context.active());
-  span.setAttribute("parameter.index", initialValue);
+const span = otel.trace.getSpan(otel.context.active());
+span.setAttribute("parameter.index", initialValue);
 ```
 
 Test the app again, look at the traces, and find the new field you added.
@@ -73,10 +74,10 @@ How long does the real calculation take?
 
 At the beginning of the `calculateFibonacciNumber` function, create a custom span
 
-` let span = tracer.startSpan("calculation");`
+`let span = tracer.startSpan("calculation");`
 
 and then after the very exciting calculation, end it:
 
-`  span.end();`
+`span.end();`
 
 Now see if you can spot the portion of your traces used for the real math!
