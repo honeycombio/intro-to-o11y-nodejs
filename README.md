@@ -31,7 +31,7 @@ HONEYCOMB_DATASET=otel-nodejs
 SERVICE_NAME=fibonacci-microservice
 ```
 
-Get a Honeycomb API Key from your Team Settings in Honeycomb. (find this by clicking on your profile in the lower-left corner.)
+Get a Honeycomb API Key from your Team Settings in [Honeycomb](https://ui.honeycomb.io). (find this by clicking on your profile in the lower-left corner.)
 
 You can name the Honeycomb Dataset anything you want.
 
@@ -54,16 +54,16 @@ When we receive the request to `/fib`, we know that index is interesting data,
 so add a field.
 
 To get access to the current span, first import the OpenTelemetry API at the
-top of `index.js`:
+top of `index.js` (this should be there already):
 
-`onst otel = require("@opentelemetry/api");`
+`const otel = require("@opentelemetry/api");`
 
 Then, anywhere in that file, you can grab the current span and add attributes.
-Put this in the request handler:
+Find these lines commented out in the request handler, and uncomment them:
 
 ```js
 const span = otel.trace.getSpan(otel.context.active());
-span.setAttribute("parameter.index", initialValue);
+span.setAttribute("parameter.index", index);
 ```
 
 Test the app again, look at the traces, and find the new field you added.
@@ -72,7 +72,7 @@ Test the app again, look at the traces, and find the new field you added.
 
 How long does the real calculation take?
 
-At the beginning of the `calculateFibonacciNumber` function, create a custom span
+At the beginning of the `calculateFibonacciNumber` function, create a custom span (or find this line and uncomment it)
 
 `let span = tracer.startSpan("calculation");`
 
