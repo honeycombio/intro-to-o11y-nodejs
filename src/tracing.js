@@ -4,7 +4,7 @@ const { DiagConsoleLogger, DiagLogLevel, diag } = require("@opentelemetry/api");
 
 // import otel dependencies
 const opentelemetry = require("@opentelemetry/api");
-const { ConsoleLogger, W3CTraceContextPropagator } = require("@opentelemetry/core");
+const { ConsoleLogger } = require("@opentelemetry/core");
 const { NodeTracerProvider } = require("@opentelemetry/sdk-trace-node");
 const {
   SimpleSpanProcessor,
@@ -48,45 +48,10 @@ module.exports = () => {
     )
   );
 
-  // uncomment this to see traces in the log
+  // uncomment this to see traces in stdout
   // provider.addSpanProcessor(new SimpleSpanProcessor(new ConsoleSpanExporter()));
 
-  /*
-   If you run this app on your own machine, you don't need this special handling.
-     
-   This part exists because Glitch is a Honeycomb customer,
-   and if we don't treat these specially, our traces become children
-   of Glitch's traces!
-   Incoming requests have Glitch's tracing context AND information about the request forwarding.
-   So we notice the forwarding headers, and then ignore the tracing headers.
-   */
-  const w3c = new W3CTraceContextPropagator();
-  const distrustRemotePropagator = {
-    // use the standard method to put headers in outgoing HTTP calls (inject)
-    inject: w3c.inject,
-    // but a special way to pull traceID out of the headers of incoming HTTP calls (extract)
-    extract(context, carrier, getter) {
-      // if an 'x-forwarded-for' header exists, then Glitch sent us this, with its trace headers that we don't want
-      const xff = getter.get(carrier, "x-forwarded-for");
-      if (!xff) {
-        // header absent: use the standard extraction mechanism
-        return w3c.extract(context, carrier, getter);
-      } else {
-        // header present: do not extract any trace information from the headers. Return the unmodified context
-        return context;
-      }
-    },
-    fields() {
-      // describes the header fields that this context propagator cares about
-      return [...w3c.fields(), "x-forwarded-for"];
-    }
-  };
-  provider.register({
-    propagator: distrustRemotePropagator
-  });
-  /*
-  end special handling for Glitch
-  */
+  provider.register();
 
   // turn on autoinstrumentation for traces you're likely to want
   registerInstrumentations({
