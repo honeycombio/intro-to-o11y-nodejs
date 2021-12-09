@@ -14,9 +14,9 @@ const { HttpInstrumentation } = require("@opentelemetry/instrumentation-http");
 const {
   ExpressInstrumentation
 } = require("@opentelemetry/instrumentation-express");
-const { OTLPTraceExporter } =  require('@opentelemetry/exporter-otlp-grpc');
+const { OTLPTraceExporter } = require('@opentelemetry/exporter-trace-otlp-grpc');
 const { registerInstrumentations } = require("@opentelemetry/instrumentation");
-const grpc = require("@opentelemetry/exporter-otlp-grpc/node_modules/@grpc/grpc-js");
+const grpc = require("@grpc/grpc-js");
 const { Resource } = require('@opentelemetry/resources');
 const { SemanticResourceAttributes } = require('@opentelemetry/semantic-conventions');
 
