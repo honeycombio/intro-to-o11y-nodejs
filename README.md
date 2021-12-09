@@ -10,6 +10,8 @@ Spoiler: this microservice implements the <a href="https://en.wikipedia.org/wiki
 
 Shortest path: [Remix this app in Glitch](https://glitch.com/edit/#!/intro-to-o11y-nodejs?path=README.md%3A1%3A0) so that you can edit it.
 
+(You can also [run locally](#running-locally)).
+
 On the home page, click "Go" to see a sequence of numbers appear gradually.
 Maybe open the browser tools and notice how long each request takes.
 Why does it get slower and slower?
@@ -81,3 +83,22 @@ and then after the very exciting calculation, end it:
 `span.end();`
 
 Now see if you can spot the portion of your traces used for the real math!
+
+## Running locally
+
+Clone this repository.
+
+If you use [VSCode devcontainers](https://code.visualstudio.com/docs/remote/containers-tutorial), open the directory in VSCode and choose "Reopen in container" when it offers. Or run the "Reopen in container" command.
+
+Otherwise, you'll need npm installed.
+
+Either way, get to a shell prompt and:
+
+```sh
+npm install
+npm run start
+```
+
+Then hit the application locally: http://localhost:3000
+
+and [continue with configuring your Honeycomb connection](#autoinstrument).
