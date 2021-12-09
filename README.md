@@ -8,7 +8,7 @@ Spoiler: this microservice implements the <a href="https://en.wikipedia.org/wiki
 
 ## What to do
 
-Remix this app in Glitch so that you can edit it.
+Shortest path: [Remix this app in Glitch](https://glitch.com/edit/#!/intro-to-o11y-nodejs?path=README.md%3A1%3A0) so that you can edit it.
 
 On the home page, click "Go" to see a sequence of numbers appear gradually.
 Maybe open the browser tools and notice how long each request takes.
@@ -21,7 +21,7 @@ Let's add tracing and find out!
 This project has the tracing configuration set up in tracing.js.
 See that the top line of `index.js` calls into `tracing.js` to activate this.
 
-Notice that in `tracing.js`, the code refers to some environment variables.
+In `tracing.js`, the code refers to some environment variables.
 
 Set those up in `.env`:
 
