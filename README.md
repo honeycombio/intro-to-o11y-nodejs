@@ -90,7 +90,7 @@ Clone this repository.
 
 If you use [VSCode devcontainers](https://code.visualstudio.com/docs/remote/containers-tutorial), open the directory in VSCode and choose "Reopen in container" when it offers. Or run the "Reopen in container" command.
 
-Otherwise, you'll need npm installed.
+Otherwise, you'll need Node.js 14+ and npm installed.
 
 Either way, get to a shell prompt and:
 
@@ -100,5 +100,9 @@ npm run start
 ```
 
 Then hit the application locally: http://localhost:3000
+
+If that works, then it's time to set up tracing. A .env file helps. Get one:
+
+`cp .env.example .env`
 
 and [continue with configuring your Honeycomb connection](#autoinstrument).

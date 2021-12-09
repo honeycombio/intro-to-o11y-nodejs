@@ -1,3 +1,4 @@
+require("dotenv").config();
 const { DiagConsoleLogger, DiagLogLevel, diag } = require("@opentelemetry/api");
 //diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.DEBUG);
 
@@ -22,7 +23,7 @@ const { SemanticResourceAttributes } = require('@opentelemetry/semantic-conventi
 
 module.exports = () => {
   // set log level to DEBUG for a lot of output
- // opentelemetry.diag.setLogger(new opentelemetry.DiagConsoleLogger(), opentelemetry.DiagLogLevel.WARN);
+  // opentelemetry.diag.setLogger(new opentelemetry.DiagConsoleLogger(), opentelemetry.DiagLogLevel.WARN);
 
   const provider = new NodeTracerProvider({
     resource: new Resource({
@@ -31,12 +32,11 @@ module.exports = () => {
   });
 
   const metadata = new grpc.Metadata();
-  // console.log("Setting API key to " + process.env.HONEYCOMB_API_KEY)
-  metadata.set("x-honeycomb-team", process.env.HONEYCOMB_API_KEY);
-  metadata.set(
-    "x-honeycomb-dataset",
-    process.env.HONEYCOMB_DATASET || "otel-nodejs"
-  );
+  const apikey = process.env.HONEYCOMB_API_KEY;
+  const dataset = process.env.HONEYCOMB_DATASET || "otel-nodejs";
+  console.log(`Exporting to Honeycomb with APIKEY <${apikey}> and dataset ${dataset}`)
+  metadata.set("x-honeycomb-team", apikey);
+  metadata.set("x-honeycomb-dataset", dataset);
   const creds = grpc.credentials.createSsl();
   provider.addSpanProcessor(
     new BatchSpanProcessor(
@@ -63,9 +63,9 @@ module.exports = () => {
   const w3c = new W3CTraceContextPropagator();
   const distrustRemotePropagator = {
     // use the standard method to put headers in outgoing HTTP calls (inject)
-    inject: w3c.inject, 
+    inject: w3c.inject,
     // but a special way to pull traceID out of the headers of incoming HTTP calls (extract)
-    extract(context, carrier, getter) { 
+    extract(context, carrier, getter) {
       // if an 'x-forwarded-for' header exists, then Glitch sent us this, with its trace headers that we don't want
       const xff = getter.get(carrier, "x-forwarded-for");
       if (!xff) {
