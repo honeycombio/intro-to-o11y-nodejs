@@ -1,3 +1,4 @@
+require("dotenv").config();
 const tracer = require("./tracing")(); // turn on tracing
 
 const otel = require("@opentelemetry/api"); // get access to the current span
@@ -68,5 +69,5 @@ function makeRequest(url) {
 }
 
 app.listen(process.env.PORT || 3000, () =>
-  console.log("Listening to port 3000")
+  console.log("Listening on port 3000. Try: http://localhost:3000/")
 );

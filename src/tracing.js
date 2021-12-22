@@ -1,4 +1,4 @@
-require("dotenv").config();
+
 const { DiagConsoleLogger, DiagLogLevel, diag } = require("@opentelemetry/api");
 //diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.DEBUG);
 
