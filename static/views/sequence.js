@@ -133,7 +133,7 @@ function auto(clickEvent) {
   }
   // OK. Now activate autoMode.
   const stepOne = go;
-  const afterStepOneWaitMs = () => { return 1000 } // TODO: make this a random time from 500-3000 ms
+  const afterStepOneWaitMs = () => Math.floor(Math.random() * 2500) + 500;
   const stepTwo = stop;
   const afterStepTwoWaitCondition = () => !goButton.disabled
   const checkEveryMs = 500;
@@ -164,7 +164,9 @@ function auto(clickEvent) {
       }
       setTimeout(checkAndContinue, checkEveryMs);
     }
-    setTimeout(continueWithStepTwo, afterStepOneWaitMs());
+    const wait = afterStepOneWaitMs();
+    console.log("Auto mode is chilling for ", wait);
+    setTimeout(continueWithStepTwo, wait);
   }
   autoModeDesired = true;
   doStuff();
