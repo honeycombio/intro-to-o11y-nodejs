@@ -11,6 +11,9 @@ const app = express();
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "/../static/views/index.html"));
 });
+app.get("/favicon.png", (req, res) => {
+  res.sendFile(path.join(__dirname, "/../static/pathetic-spiral-icon.png"));
+});
 app.get("/sequence.js", (req, res) => {
   res.sendFile(path.join(__dirname, "/../static/views/sequence.js"));
 });
