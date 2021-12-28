@@ -3,6 +3,7 @@ console.log("hello from sequence.js");
 const putNumbersHere = document.getElementById("put-numbers-here");
 const goButton = document.getElementById("go-button");
 const stopButton = document.getElementById("stop-button");
+const autoButton = document.getElementById("auto-checkbox");
 var stopRequested = false;
 
 function formatFibonacciNumber(n) {
@@ -116,5 +117,60 @@ function stop() {
   stopRequested = true;
 }
 stopButton.addEventListener("click", stop);
+
+let autoModeDesired = false;
+let autoModeActive = false;
+function auto(clickEvent) {
+  const nextAutoMode = clickEvent.target.checked;
+  console.log("you pushed auto. Is it checked now? " + nextAutoMode);
+  if (nextAutoMode == false) {
+    autoModeDesired = false;
+    return;
+  }
+  if (autoModeActive) {
+    console.log("auto mode is already happening");
+    return;
+  }
+  // OK. Now activate autoMode.
+  const stepOne = go;
+  const afterStepOneWaitMs = () => Math.floor(Math.random() * 1000) + 100;
+  const stepTwo = stop;
+  const afterStepTwoWaitCondition = () => !goButton.disabled
+  const checkEveryMs = 500;
+  const repeatCondition = () => autoModeDesired
+
+  const doStuff = () => {
+    autoModeActive = true;
+    stepOne();
+    const weDidIt = () => {
+      console.log("We did it!")
+      if (repeatCondition()) {
+        console.log("Starting again...")
+        doStuff();
+      } else {
+        console.log("Whew! We are done")
+        autoModeActive = false;
+      }
+    }
+    const continueWithStepTwo = () => {
+      stepTwo();
+      const checkAndContinue = () => {
+        if (afterStepTwoWaitCondition()) {
+          weDidIt();
+        } else {
+          console.log("Not ready yet. Checking again in " + checkEveryMs)
+          setTimeout(checkAndContinue, checkEveryMs);
+        }
+      }
+      setTimeout(checkAndContinue, checkEveryMs);
+    }
+    const wait = afterStepOneWaitMs();
+    console.log("Auto mode is chilling for ", wait);
+    setTimeout(continueWithStepTwo, wait);
+  }
+  autoModeDesired = true;
+  doStuff();
+}
+autoButton.addEventListener("click", auto);
 
 buttonsReadyToGo();
