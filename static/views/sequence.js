@@ -3,6 +3,7 @@ console.log("hello from sequence.js");
 const putNumbersHere = document.getElementById("put-numbers-here");
 const goButton = document.getElementById("go-button");
 const stopButton = document.getElementById("stop-button");
+const autoButton = document.getElementById("auto-button");
 var stopRequested = false;
 
 function formatFibonacciNumber(n) {
@@ -116,5 +117,10 @@ function stop() {
   stopRequested = true;
 }
 stopButton.addEventListener("click", stop);
+
+function auto() {
+  console.log("you pushed auto");
+}
+autoButton.addEventListener("click", auto);
 
 buttonsReadyToGo();
