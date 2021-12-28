@@ -118,12 +118,56 @@ function stop() {
 }
 stopButton.addEventListener("click", stop);
 
-function auto() {
-  console.log("you pushed auto");
-  const doThis = go;
-  const thenWait = () => { 1000 } // TODO: make this a random time from 500-3000 ms
-  const thenDoThis = stop;
+let autoModeDesired = false;
+let autoModeActive = false;
+function auto(clickEvent) {
+  const nextAutoMode = clickEvent.target.checked;
+  console.log("you pushed auto. Is it checked now? " + nextAutoMode);
+  if (nextAutoMode == false) {
+    autoModeDesired = false;
+    return;
+  }
+  if (autoModeActive) {
+    console.log("auto mode is already happening");
+    return;
+  }
+  // OK. Now activate autoMode.
+  const stepOne = go;
+  const afterStepOneWaitMs = () => { return 1000 } // TODO: make this a random time from 500-3000 ms
+  const stepTwo = stop;
+  const afterStepTwoWaitCondition = () => !goButton.disabled
+  const checkEveryMs = 500;
+  const repeatCondition = () => autoModeDesired
 
+  const doStuff = () => {
+    autoModeActive = true;
+    stepOne();
+    const weDidIt = () => {
+      console.log("We did it!")
+      if (repeatCondition()) {
+        console.log("Starting again...")
+        doStuff();
+      } else {
+        console.log("Whew! We are done")
+        autoModeActive = false;
+      }
+    }
+    const continueWithStepTwo = () => {
+      stepTwo();
+      const checkAndContinue = () => {
+        if (afterStepTwoWaitCondition()) {
+          weDidIt();
+        } else {
+          console.log("Not ready yet. Checking again in " + checkEveryMs)
+          setTimeout(checkAndContinue, checkEveryMs);
+        }
+      }
+      setTimeout(checkAndContinue, checkEveryMs);
+    }
+    setTimeout(continueWithStepTwo, afterStepOneWaitMs());
+  }
+  autoModeDesired = true;
+  doStuff();
 }
 autoButton.addEventListener("click", auto);
 

@@ -23,7 +23,7 @@ const { SemanticResourceAttributes } = require('@opentelemetry/semantic-conventi
 
 module.exports = () => {
   // set log level to DEBUG for a lot of output
-  // opentelemetry.diag.setLogger(new opentelemetry.DiagConsoleLogger(), opentelemetry.DiagLogLevel.WARN);
+opentelemetry.diag.setLogger(new opentelemetry.DiagConsoleLogger(), opentelemetry.DiagLogLevel.WARN);
 
   const provider = new NodeTracerProvider({
     resource: new Resource({
