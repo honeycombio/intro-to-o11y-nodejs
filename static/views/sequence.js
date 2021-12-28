@@ -3,7 +3,7 @@ console.log("hello from sequence.js");
 const putNumbersHere = document.getElementById("put-numbers-here");
 const goButton = document.getElementById("go-button");
 const stopButton = document.getElementById("stop-button");
-const autoButton = document.getElementById("auto-button");
+const autoButton = document.getElementById("auto-checkbox");
 var stopRequested = false;
 
 function formatFibonacciNumber(n) {
@@ -120,6 +120,10 @@ stopButton.addEventListener("click", stop);
 
 function auto() {
   console.log("you pushed auto");
+  const doThis = go;
+  const thenWait = () => { 1000 } // TODO: make this a random time from 500-3000 ms
+  const thenDoThis = stop;
+
 }
 autoButton.addEventListener("click", auto);
 
