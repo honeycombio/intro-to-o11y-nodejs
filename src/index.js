@@ -14,6 +14,9 @@ app.get("/", (req, res) => {
 app.get("/favicon.png", (req, res) => {
   res.sendFile(path.join(__dirname, "/../static/pathetic-spiral-icon.png"));
 });
+app.get("/styles.css", (req, res) => {
+  res.sendFile(path.join(__dirname, "/../static/styles.css"));
+});
 app.get("/sequence.js", (req, res) => {
   res.sendFile(path.join(__dirname, "/../static/views/sequence.js"));
 });

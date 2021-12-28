@@ -1,0 +1,11 @@
+.fibonacci-sequence {
+  margin:20px;
+  padding:10px;
+  font-family: Monospace;
+  font-size:larger;
+  border: 1px black solid;
+}
+.other-side {
+  width: 98%;
+  text-align: right;
+}

@@ -3,53 +3,44 @@
 
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <title>Fibonacci Microservice</title>
-    <link id="favicon" rel="icon" href="/favicon.png" type="image/png">
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <style>
-      .fibonacci-sequence {
-        margin:20px;
-        padding:10px;
-        font-family: Monospace;
-        font-size:larger;
-        border: 1px black solid;
-      }
-      .other-side {
-        width: 98%;
-        text-align: right;
-      }
-    </style>
-       <script src="/sequence.js" defer></script>
- 
-  </head>
-  <body>
-    <header>
-      <h1>
-         A sequence of numbers:
-      </h1>
-    </header>
 
-    <main>
-      <button id="go-button">
-        Go
+<head>
+  <title>Fibonacci Microservice</title>
+  <link id="favicon" rel="icon" href="/favicon.png" type="image/png">
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="styles.css" rel="stylesheet" type="text/css" media="all">
+  <script src="/sequence.js" defer></script>
+
+</head>
+
+<body>
+  <header>
+    <h1>
+      A sequence of numbers:
+    </h1>
+  </header>
+
+  <main>
+    <button id="go-button">
+      Go
+    </button>
+    <div id="put-numbers-here" class="fibonacci-sequence">
+      &nbsp;
+    </div>
+    <button id="stop-button">
+      Stop
+    </button>
+
+    <div class="other-side">
+      <button id="auto-button">
+        Auto
       </button>
-      <div id="put-numbers-here" class="fibonacci-sequence">
-        &nbsp;
-      </div>
-      <button id="stop-button">
-        Stop
-      </button>
+    </div>
 
-      <div class="other-side">
-        <button id="auto-button">
-          Auto
-        </button>
-      </div>
+  </main>
 
-    </main>
+</body>
 
-  </body>
 </html>
