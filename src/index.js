@@ -1,10 +1,9 @@
 require("dotenv").config();
 const tracer = require("./tracing")(); // turn on tracing
 
-const otel = require("@opentelemetry/api"); // get access to the current span
-
 const express = require("express");
 const http = require("http");
+const opentelemetry = require("@opentelemetry/api");
 const path = require("path");
 const app = express();
 
@@ -24,9 +23,8 @@ app.get("/sequence.js", (req, res) => {
 app.get("/fib", async (req, res) => {
   let index = parseInt(req.query.index);
 
-  // populate a custom attribute on the current span
-  // const span = otel.trace.getSpan(otel.context.active());
-  // span.setAttribute("parameter.index", index);
+  const span = opentelemetry.trace.getSpan(opentelemetry.context.active());
+  span.setAttribute("app.seqofnum.parameter.index", index);
 
   let returnValue = 0;
   if (index === 0) {
@@ -46,6 +44,7 @@ app.get("/fib", async (req, res) => {
                                            minusTwoReturn.fibonacciNumber);
     // span.end();
   }
+  await sleep(30);
   const returnObject = { fibonacciNumber: returnValue, index: index }
   // maybe add the return value as a custom attribute too?
   res.send(JSON.stringify(returnObject));
@@ -55,6 +54,10 @@ function calculateFibonacciNumber(previous, oneBeforeThat) {
  // can you wrap this next line in a custom span?
   const result = previous + oneBeforeThat;
   return previous + oneBeforeThat;
+}
+
+async function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 function makeRequest(url) {
