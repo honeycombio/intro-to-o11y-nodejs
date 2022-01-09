@@ -44,7 +44,6 @@ app.get("/fib", async (req, res) => {
                                            minusTwoReturn.fibonacciNumber);
     // span.end();
   }
-  await sleep(30);
   const returnObject = { fibonacciNumber: returnValue, index: index }
   // maybe add the return value as a custom attribute too?
   res.send(JSON.stringify(returnObject));
@@ -54,10 +53,6 @@ function calculateFibonacciNumber(previous, oneBeforeThat) {
  // can you wrap this next line in a custom span?
   const result = previous + oneBeforeThat;
   return previous + oneBeforeThat;
-}
-
-async function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 function makeRequest(url) {
