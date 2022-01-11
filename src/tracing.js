@@ -44,12 +44,12 @@ opentelemetry.diag.setLogger(new opentelemetry.DiagConsoleLogger(), opentelemetr
         url: "grpc://api.honeycomb.io:443/",
         credentials: creds,
         metadata
-      })
+      }), { scheduledDelayMillis: 500, maxQueueSize: 16000, maxExportBatchSize: 1000 }
     )
   );
 
   // uncomment this to see traces in stdout
- // provider.addSpanProcessor(new BatchSpanProcessor(new ConsoleSpanExporter()));
+  //provider.addSpanProcessor(new BatchSpanProcessor(new ConsoleSpanExporter()));
 
   provider.register();
 
