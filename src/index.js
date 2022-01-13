@@ -3,7 +3,8 @@ const tracer = require("./tracing")(); // turn on tracing
 
 const express = require("express");
 const http = require("http");
-const opentelemetry = require("@opentelemetry/api");
+const { SpanStatusCode, defaultTextMapSetter, context } = require("@opentelemetry/api");
+const { W3CTraceContextPropagator } = require("@opentelemetry/core");
 const path = require("path");
 const app = express();
 
@@ -20,36 +21,36 @@ app.get("/sequence.js", (req, res) => {
   res.sendFile(path.join(__dirname, "/../static/views/sequence.js"));
 });
 
-app.get("/fib", respondToFib(tracer));
+app.get("/fib", respondToFib(tracer, context.active()));
 
-function respondToFib(tracer) {
+function respondToFib(tracer, context) {
   return async (req, res) => {
-    let index = parseInt(req.query.index);
+    const span = tracer.startActiveSpan("GET /fib", context, async (span) => {
+      let index = parseInt(req.query.index);
+      span.setAttribute("app.seqofnum.parameter.index", index);
 
-    // const span = opentelemetry.trace.getSpan(opentelemetry.context.active());
-    // span.setAttribute("app.seqofnum.parameter.index", index);
-
-    let returnValue = 0;
-    if (index === 0) {
-      returnValue = 0;
-    } else if (index === 1) {
-      returnValue = 1;
-    } else {
-      let minusOneResponse = await makeRequest(
-        `http://127.0.0.1:3000/fib?index=${index - 1}`
-      );
-      let minusOneParsedResponse = JSON.parse(minusOneResponse);
-      let minusTwoReturn = JSON.parse(await makeRequest(
-        `http://127.0.0.1:3000/fib?index=${index - 2}`
-      ));
-      // let span = tracer.startSpan("calculation");
-      returnValue = calculateFibonacciNumber(minusOneParsedResponse.fibonacciNumber,
-        minusTwoReturn.fibonacciNumber);
-      // span.end();
-    }
-    const returnObject = { fibonacciNumber: returnValue, index: index }
-    // maybe add the return value as a custom attribute too?
-    res.send(JSON.stringify(returnObject));
+      let returnValue = 0;
+      if (index === 0) {
+        returnValue = 0;
+      } else if (index === 1) {
+        returnValue = 1;
+      } else {
+        let minusOneResponse = await makeRequest(tracer, context,
+          `http://127.0.0.1:3000/fib?index=${index - 1}`
+        );
+        let minusOneParsedResponse = JSON.parse(minusOneResponse);
+        let minusTwoReturn = JSON.parse(await makeRequest(tracer, context,
+          `http://127.0.0.1:3000/fib?index=${index - 2}`
+        ));
+        returnValue = calculateFibonacciNumber(minusOneParsedResponse.fibonacciNumber,
+          minusTwoReturn.fibonacciNumber);
+      }
+      const returnObject = { fibonacciNumber: returnValue, index: index }
+      // maybe add the return value as a custom attribute too?
+      span.setStatus({ code: SpanStatusCode.OK })
+      span.end();
+      res.send(JSON.stringify(returnObject));
+    });
   }
 }
 
@@ -59,20 +60,33 @@ function calculateFibonacciNumber(previous, oneBeforeThat) {
   return previous + oneBeforeThat;
 }
 
-function makeRequest(url) {
-  return new Promise((resolve, reject) => {
-    let data = "";
-    http.get(url, res => {
-      res.on("data", chunk => {
-        data += chunk;
+function makeRequest(tracer, context, url) {
+  console.log("Before the active span, context is: " + JSON.stringify(context));
+  return tracer.startActiveSpan("GET", context, async (span) => {
+    console.log("In makeRequest, the context is: " + JSON.stringify(context));
+    return new Promise((resolve, reject) => {
+      let data = "";
+      const headersWithTraceContext = new W3CTraceContextPropagator().inject(context, {}, defaultTextMapSetter)
+      http.get(url, { headers: headersWithTraceContext }, res => {
+        res.on("data", chunk => {
+          data += chunk;
+        });
+        res.on("end", () => {
+          resolve(data);
+        });
+        res.on("error", err => {
+          reject(err);
+        });
+      })
+    }).then(
+      (out) => { span.setStatus({ code: SpanStatusCode.OK }); span.end(); return out; },
+      (err) => {
+        span.setStatus({
+          code: SpanStatusCode.ERROR,
+          message: err?.message,
+        });
+        span.end();
       });
-      res.on("end", () => {
-        resolve(data);
-      });
-      res.on("error", err => {
-        reject(err);
-      });
-    });
   });
 }
 
