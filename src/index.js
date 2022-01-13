@@ -20,37 +20,41 @@ app.get("/sequence.js", (req, res) => {
   res.sendFile(path.join(__dirname, "/../static/views/sequence.js"));
 });
 
-app.get("/fib", async (req, res) => {
-  let index = parseInt(req.query.index);
+app.get("/fib", respondToFib(tracer));
 
-  // const span = opentelemetry.trace.getSpan(opentelemetry.context.active());
-  // span.setAttribute("app.seqofnum.parameter.index", index);
+function respondToFib(tracer) {
+  return async (req, res) => {
+    let index = parseInt(req.query.index);
 
-  let returnValue = 0;
-  if (index === 0) {
-    returnValue = 0;
-  } else if (index === 1) {
-    returnValue = 1;
-  } else {
-    let minusOneResponse = await makeRequest(
-      `http://127.0.0.1:3000/fib?index=${index - 1}`
-    );
-    let minusOneParsedResponse = JSON.parse(minusOneResponse);
-    let minusTwoReturn = JSON.parse(await makeRequest(
-      `http://127.0.0.1:3000/fib?index=${index - 2}`
-    ));
-    // let span = tracer.startSpan("calculation");
-    returnValue = calculateFibonacciNumber(minusOneParsedResponse.fibonacciNumber,
-                                           minusTwoReturn.fibonacciNumber);
-    // span.end();
+    // const span = opentelemetry.trace.getSpan(opentelemetry.context.active());
+    // span.setAttribute("app.seqofnum.parameter.index", index);
+
+    let returnValue = 0;
+    if (index === 0) {
+      returnValue = 0;
+    } else if (index === 1) {
+      returnValue = 1;
+    } else {
+      let minusOneResponse = await makeRequest(
+        `http://127.0.0.1:3000/fib?index=${index - 1}`
+      );
+      let minusOneParsedResponse = JSON.parse(minusOneResponse);
+      let minusTwoReturn = JSON.parse(await makeRequest(
+        `http://127.0.0.1:3000/fib?index=${index - 2}`
+      ));
+      // let span = tracer.startSpan("calculation");
+      returnValue = calculateFibonacciNumber(minusOneParsedResponse.fibonacciNumber,
+        minusTwoReturn.fibonacciNumber);
+      // span.end();
+    }
+    const returnObject = { fibonacciNumber: returnValue, index: index }
+    // maybe add the return value as a custom attribute too?
+    res.send(JSON.stringify(returnObject));
   }
-  const returnObject = { fibonacciNumber: returnValue, index: index }
-  // maybe add the return value as a custom attribute too?
-  res.send(JSON.stringify(returnObject));
-});
+}
 
 function calculateFibonacciNumber(previous, oneBeforeThat) {
- // can you wrap this next line in a custom span?
+  // can you wrap this next line in a custom span?
   const result = previous + oneBeforeThat;
   return previous + oneBeforeThat;
 }
