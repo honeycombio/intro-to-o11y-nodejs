@@ -23,8 +23,8 @@ app.get("/sequence.js", (req, res) => {
 app.get("/fib", async (req, res) => {
   let index = parseInt(req.query.index);
 
-  const span = opentelemetry.trace.getSpan(opentelemetry.context.active());
-  span.setAttribute("app.seqofnum.parameter.index", index);
+  // const span = opentelemetry.trace.getSpan(opentelemetry.context.active());
+  // span.setAttribute("app.seqofnum.parameter.index", index);
 
   let returnValue = 0;
   if (index === 0) {

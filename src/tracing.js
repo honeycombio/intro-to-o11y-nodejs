@@ -49,14 +49,14 @@ opentelemetry.diag.setLogger(new opentelemetry.DiagConsoleLogger(), opentelemetr
   );
 
   // uncomment this to see traces in stdout
-  //provider.addSpanProcessor(new BatchSpanProcessor(new ConsoleSpanExporter()));
+  provider.addSpanProcessor(new BatchSpanProcessor(new ConsoleSpanExporter()));
 
   provider.register();
 
   // turn on autoinstrumentation for traces you're likely to want
   registerInstrumentations({
     tracerProvider: provider,
-    instrumentations: [new HttpInstrumentation(), new ExpressInstrumentation()]
+  //  instrumentations: [new HttpInstrumentation(), new ExpressInstrumentation()]
   });
   
   process.on("SIGINT", async () => {
