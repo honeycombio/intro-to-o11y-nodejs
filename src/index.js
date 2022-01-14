@@ -28,51 +28,52 @@ app.get("/fib", respondToFib(tracer));
 
 function respondToFib(tracer) {
   return async (req, res) => {
-    const parentTraceContext = TraceContext.fromHeaders(req.headers, tracer);
-    parentTraceContext.inSpan("GET /fib", async (span, traceContext) => {
+    new TraceContext(tracer).fromHeaders(req.headers, async parentTraceContext => {
+      parentTraceContext.inSpan("GET /fib", async (span, traceContext) => {
+        span.setAttribute("span.kind", "server");
 
-      let index = parseInt(req.query.index);
-      span.setAttribute("app.seqofnum.parameter.index", index);
+        let index = parseInt(req.query.index);
+        span.setAttribute("app.seqofnum.parameter.index", index);
 
-      let returnValue = 0;
-      if (index === 0) {
-        returnValue = 0;
-      } else if (index === 1) {
-        returnValue = 1;
-      } else {
-        returnValue = await sumPreviousTwoFibonacciNumbers(traceContext, index);
-      }
-      const returnObject = { fibonacciNumber: returnValue, index: index }
-      // maybe add the return value as a custom attribute too?
-      span.setStatus({ code: SpanStatusCode.OK })
-      span.end();
-      res.send(JSON.stringify(returnObject));
+        let returnValue = 0;
+        if (index === 0) {
+          returnValue = 0;
+        } else if (index === 1) {
+          returnValue = 1;
+        } else {
+          returnValue = await sumPreviousTwoFibonacciNumbers(traceContext, index)
+          .catch(err => {
+            span.setStatus({
+              code: SpanStatusCode.ERROR,
+              message: err.message,
+            });
+            span.end();
+            res.status(500);
+            res.send("failure");
+            throw err;
+          });
+        }
+        const returnObject = { fibonacciNumber: returnValue, index: index }
+        // maybe add the return value as a custom attribute too?
+        span.setStatus({ code: SpanStatusCode.OK })
+        span.end();
+        res.send(JSON.stringify(returnObject));
+      });
     });
   }
 }
 
 async function sumPreviousTwoFibonacciNumbers(traceContext, index) {
-  try {
-    let minusOneResponse = await makeRequest(traceContext,
-      `http://127.0.0.1:3000/fib?index=${index - 1}`
-    );
-    let minusOneParsedResponse = JSON.parse(minusOneResponse);
-    let minusTwoReturn = JSON.parse(await makeRequest(traceContext,
-      `http://127.0.0.1:3000/fib?index=${index - 2}`
-    ));
+  let minusOneResponse = await makeRequest(traceContext,
+    `http://127.0.0.1:3000/fib?index=${index - 1}`
+  );
+  let minusOneParsedResponse = JSON.parse(minusOneResponse);
+  let minusTwoReturn = JSON.parse(await makeRequest(traceContext,
+    `http://127.0.0.1:3000/fib?index=${index - 2}`
+  ));
 
-    return calculateFibonacciNumber(minusOneParsedResponse.fibonacciNumber,
-      minusTwoReturn.fibonacciNumber);
-  } catch (err) {
-    span.setStatus({
-      code: SpanStatusCode.ERROR,
-      message: err.message,
-    });
-    span.end();
-    res.status(500);
-    res.send("failure");
-    throw err;
-  }
+  return calculateFibonacciNumber(minusOneParsedResponse.fibonacciNumber,
+    minusTwoReturn.fibonacciNumber);
 }
 
 function calculateFibonacciNumber(previous, oneBeforeThat) {
@@ -81,13 +82,21 @@ function calculateFibonacciNumber(previous, oneBeforeThat) {
   return previous + oneBeforeThat;
 }
 
+/**
+ * No, this class doesn't make any sense.
+ * Its purpose is to use the OpenTelemetry API while pretending that
+ * it is not storing context globally.
+ * 
+ * This class imitates an explicit implementation of tracing.
+ */
 class TraceContext {
   constructor(f) {
     this.tracer = tracer;
   }
 
-  static fromHeaders(headers, tracer) {
-    new W3CTraceContextPropagator().extract(contextAPI.active(), headers, defaultTextMapGetter);
+  fromHeaders(headers, fn) {
+    const contextFromHeaders = new W3CTraceContextPropagator().extract(contextAPI.active(), headers, defaultTextMapGetter);
+    contextAPI.with(contextFromHeaders, () => fn(this))
     return new TraceContext(tracer);
   }
 
@@ -110,11 +119,10 @@ class TraceContext {
 function makeRequest(parentTraceContext, url) {
 
   const [span, traceContext] = parentTraceContext.startSpan("GET");
+  span.setAttribute("span.kind", "client");
   return new Promise((resolve, reject) => {
     let data = "";
     const headers = traceContext.getPropagationHeaders();
-    console.log("Headers with context: ", headers);
-    span.setAttribute("headers", JSON.stringify(headers));
     http.get(url, { headers: headers }, res => {
       res.on("data", chunk => {
         data += chunk;
