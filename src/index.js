@@ -42,16 +42,16 @@ function respondToFib(tracer) {
           returnValue = 1;
         } else {
           returnValue = await sumPreviousTwoFibonacciNumbers(traceContext, index)
-          .catch(err => {
-            span.setStatus({
-              code: SpanStatusCode.ERROR,
-              message: err.message,
+            .catch(err => {
+              span.setStatus({
+                code: SpanStatusCode.ERROR,
+                message: err.message,
+              });
+              span.end();
+              res.status(500);
+              res.send("failure");
+              throw err;
             });
-            span.end();
-            res.status(500);
-            res.send("failure");
-            throw err;
-          });
         }
         const returnObject = { fibonacciNumber: returnValue, index: index }
         // maybe add the return value as a custom attribute too?
@@ -75,6 +75,38 @@ async function sumPreviousTwoFibonacciNumbers(traceContext, index) {
   return calculateFibonacciNumber(minusOneParsedResponse.fibonacciNumber,
     minusTwoReturn.fibonacciNumber);
 }
+
+function makeRequest(parentTraceContext, url) {
+  const [span, traceContext] = parentTraceContext.startSpan("GET");
+  span.setAttribute("span.kind", "client");
+  return new Promise((resolve, reject) => {
+    let data = "";
+    const headers = traceContext.getPropagationHeaders();
+    http.get(url, { headers: headers }, res => {
+      res.on("data", chunk => {
+        data += chunk;
+      });
+      res.on("end", () => {
+        span.setStatus({ code: SpanStatusCode.OK });
+        span.setAttribute("app.result", data);
+        span.end();
+        resolve(data);
+      });
+      res.on("error", err => {
+        span.setStatus({
+          code: SpanStatusCode.ERROR,
+          message: err?.message,
+        });
+        span.end();
+        reject(err);
+      });
+    })
+  })
+}
+
+app.listen(process.env.PORT || 3000, () =>
+  console.log("Listening on port 3000. Try: http://localhost:3000/")
+);
 
 function calculateFibonacciNumber(previous, oneBeforeThat) {
   // can you wrap this next line in a custom span?
@@ -114,43 +146,3 @@ class TraceContext {
     tracer.startActiveSpan(name, (span) => fn(span, this));
   }
 }
-
-
-function makeRequest(parentTraceContext, url) {
-
-  const [span, traceContext] = parentTraceContext.startSpan("GET");
-  span.setAttribute("span.kind", "client");
-  return new Promise((resolve, reject) => {
-    let data = "";
-    const headers = traceContext.getPropagationHeaders();
-    http.get(url, { headers: headers }, res => {
-      res.on("data", chunk => {
-        data += chunk;
-      });
-      res.on("end", () => {
-        resolve(data);
-      });
-      res.on("error", err => {
-        reject(err);
-      });
-    })
-  }).then(
-    (out) => {
-      span.setStatus({ code: SpanStatusCode.OK });
-      span.setAttribute("app.result", out);
-      span.end();
-      return out;
-    },
-    (err) => {
-      span.setStatus({
-        code: SpanStatusCode.ERROR,
-        message: err?.message,
-      });
-      span.end();
-      throw err;
-    });
-}
-
-app.listen(process.env.PORT || 3000, () =>
-  console.log("Listening on port 3000. Try: http://localhost:3000/")
-);
