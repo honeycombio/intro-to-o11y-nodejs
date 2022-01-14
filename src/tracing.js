@@ -11,10 +11,6 @@ const {
   ConsoleSpanExporter,
   BatchSpanProcessor
 } = require("@opentelemetry/sdk-trace-base");
-const { HttpInstrumentation } = require("@opentelemetry/instrumentation-http");
-const {
-  ExpressInstrumentation
-} = require("@opentelemetry/instrumentation-express");
 const { OTLPTraceExporter } = require('@opentelemetry/exporter-trace-otlp-grpc');
 const { registerInstrumentations } = require("@opentelemetry/instrumentation");
 const grpc = require("@grpc/grpc-js");
@@ -49,7 +45,7 @@ opentelemetry.diag.setLogger(new opentelemetry.DiagConsoleLogger(), opentelemetr
   );
 
   // uncomment this to see traces in stdout
-  provider.addSpanProcessor(new BatchSpanProcessor(new ConsoleSpanExporter()));
+ // provider.addSpanProcessor(new BatchSpanProcessor(new ConsoleSpanExporter()));
 
   provider.register();
 

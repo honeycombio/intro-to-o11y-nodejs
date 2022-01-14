@@ -3,10 +3,13 @@ const tracer = require("./tracing")(); // turn on tracing
 
 const express = require("express");
 const http = require("http");
-const { SpanStatusCode, defaultTextMapSetter, context } = require("@opentelemetry/api");
+const opentelemetry = require("@opentelemetry/api");
 const { W3CTraceContextPropagator } = require("@opentelemetry/core");
+const { getSpan } = require("@opentelemetry/api/build/src/trace/context-utils");
 const path = require("path");
 const app = express();
+const { SpanStatusCode, defaultTextMapGetter, defaultTextMapSetter } = opentelemetry;
+const contextAPI = opentelemetry.context;
 
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "/../static/views/index.html"));
@@ -21,11 +24,13 @@ app.get("/sequence.js", (req, res) => {
   res.sendFile(path.join(__dirname, "/../static/views/sequence.js"));
 });
 
-app.get("/fib", respondToFib(tracer, context.active()));
+app.get("/fib", respondToFib(tracer));
 
-function respondToFib(tracer, context) {
+function respondToFib(tracer) {
   return async (req, res) => {
-    const span = tracer.startActiveSpan("GET /fib", context, async (span) => {
+    const parentTraceContext = TraceContext.fromHeaders(req.headers, tracer);
+    parentTraceContext.inSpan("GET /fib", async (span, traceContext) => {
+
       let index = parseInt(req.query.index);
       span.setAttribute("app.seqofnum.parameter.index", index);
 
@@ -35,15 +40,27 @@ function respondToFib(tracer, context) {
       } else if (index === 1) {
         returnValue = 1;
       } else {
-        let minusOneResponse = await makeRequest(tracer, context,
-          `http://127.0.0.1:3000/fib?index=${index - 1}`
-        );
-        let minusOneParsedResponse = JSON.parse(minusOneResponse);
-        let minusTwoReturn = JSON.parse(await makeRequest(tracer, context,
-          `http://127.0.0.1:3000/fib?index=${index - 2}`
-        ));
-        returnValue = calculateFibonacciNumber(minusOneParsedResponse.fibonacciNumber,
-          minusTwoReturn.fibonacciNumber);
+        try {
+          let minusOneResponse = await makeRequest(traceContext,
+            `http://127.0.0.1:3000/fib?index=${index - 1}`
+          );
+          let minusOneParsedResponse = JSON.parse(minusOneResponse);
+          let minusTwoReturn = JSON.parse(await makeRequest(traceContext,
+            `http://127.0.0.1:3000/fib?index=${index - 2}`
+          ));
+
+          returnValue = calculateFibonacciNumber(minusOneParsedResponse.fibonacciNumber,
+            minusTwoReturn.fibonacciNumber);
+        } catch (err) {
+          span.setStatus({
+            code: SpanStatusCode.ERROR,
+            message: err.message,
+          });
+          span.end();
+          res.status(500);
+          res.send("failure");
+          throw err;
+        }
       }
       const returnObject = { fibonacciNumber: returnValue, index: index }
       // maybe add the return value as a custom attribute too?
@@ -52,6 +69,7 @@ function respondToFib(tracer, context) {
       res.send(JSON.stringify(returnObject));
     });
   }
+
 }
 
 function calculateFibonacciNumber(previous, oneBeforeThat) {
@@ -60,34 +78,66 @@ function calculateFibonacciNumber(previous, oneBeforeThat) {
   return previous + oneBeforeThat;
 }
 
-function makeRequest(tracer, context, url) {
-  console.log("Before the active span, context is: " + JSON.stringify(context));
-  return tracer.startActiveSpan("GET", context, async (span) => {
-    console.log("In makeRequest, the context is: " + JSON.stringify(context));
-    return new Promise((resolve, reject) => {
-      let data = "";
-      const headersWithTraceContext = new W3CTraceContextPropagator().inject(context, {}, defaultTextMapSetter)
-      http.get(url, { headers: headersWithTraceContext }, res => {
-        res.on("data", chunk => {
-          data += chunk;
-        });
-        res.on("end", () => {
-          resolve(data);
-        });
-        res.on("error", err => {
-          reject(err);
-        });
-      })
-    }).then(
-      (out) => { span.setStatus({ code: SpanStatusCode.OK }); span.end(); return out; },
-      (err) => {
-        span.setStatus({
-          code: SpanStatusCode.ERROR,
-          message: err?.message,
-        });
-        span.end();
+class TraceContext {
+  constructor(f) {
+    this.tracer = tracer;
+  }
+
+  static fromHeaders(headers, tracer) {
+    new W3CTraceContextPropagator().extract(contextAPI.active(), headers, defaultTextMapGetter);
+    return new TraceContext(tracer);
+  }
+
+  /* [Span, TraceContext] */ startSpan(name) {
+    return [this.tracer.startActiveSpan(name, s => s), this];
+  }
+
+  getPropagationHeaders() {
+    const headers = {};
+    new W3CTraceContextPropagator().inject(contextAPI.active(), headers, defaultTextMapSetter);
+    return headers;
+  }
+
+  inSpan(name, fn) {
+    tracer.startActiveSpan(name, (span) => fn(span, this));
+  }
+}
+
+
+function makeRequest(parentTraceContext, url) {
+
+  const [span, traceContext] = parentTraceContext.startSpan("GET");
+  return new Promise((resolve, reject) => {
+    let data = "";
+    const headers = traceContext.getPropagationHeaders();
+    console.log("Headers with context: ", headers);
+    span.setAttribute("headers", JSON.stringify(headers));
+    http.get(url, { headers: headers }, res => {
+      res.on("data", chunk => {
+        data += chunk;
       });
-  });
+      res.on("end", () => {
+        resolve(data);
+      });
+      res.on("error", err => {
+        reject(err);
+      });
+    })
+  }).then(
+    (out) => {
+      span.setStatus({ code: SpanStatusCode.OK });
+      span.setAttribute("app.result", out);
+      span.end();
+      return out;
+    },
+    (err) => {
+      span.setStatus({
+        code: SpanStatusCode.ERROR,
+        message: err?.message,
+      });
+      span.end();
+      throw err;
+    });
 }
 
 app.listen(process.env.PORT || 3000, () =>
