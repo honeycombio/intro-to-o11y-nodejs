@@ -40,27 +40,7 @@ function respondToFib(tracer) {
       } else if (index === 1) {
         returnValue = 1;
       } else {
-        try {
-          let minusOneResponse = await makeRequest(traceContext,
-            `http://127.0.0.1:3000/fib?index=${index - 1}`
-          );
-          let minusOneParsedResponse = JSON.parse(minusOneResponse);
-          let minusTwoReturn = JSON.parse(await makeRequest(traceContext,
-            `http://127.0.0.1:3000/fib?index=${index - 2}`
-          ));
-
-          returnValue = calculateFibonacciNumber(minusOneParsedResponse.fibonacciNumber,
-            minusTwoReturn.fibonacciNumber);
-        } catch (err) {
-          span.setStatus({
-            code: SpanStatusCode.ERROR,
-            message: err.message,
-          });
-          span.end();
-          res.status(500);
-          res.send("failure");
-          throw err;
-        }
+        returnValue = await sumPreviousTwoFibonacciNumbers(traceContext, index);
       }
       const returnObject = { fibonacciNumber: returnValue, index: index }
       // maybe add the return value as a custom attribute too?
@@ -69,7 +49,30 @@ function respondToFib(tracer) {
       res.send(JSON.stringify(returnObject));
     });
   }
+}
 
+async function sumPreviousTwoFibonacciNumbers(traceContext, index) {
+  try {
+    let minusOneResponse = await makeRequest(traceContext,
+      `http://127.0.0.1:3000/fib?index=${index - 1}`
+    );
+    let minusOneParsedResponse = JSON.parse(minusOneResponse);
+    let minusTwoReturn = JSON.parse(await makeRequest(traceContext,
+      `http://127.0.0.1:3000/fib?index=${index - 2}`
+    ));
+
+    return calculateFibonacciNumber(minusOneParsedResponse.fibonacciNumber,
+      minusTwoReturn.fibonacciNumber);
+  } catch (err) {
+    span.setStatus({
+      code: SpanStatusCode.ERROR,
+      message: err.message,
+    });
+    span.end();
+    res.status(500);
+    res.send("failure");
+    throw err;
+  }
 }
 
 function calculateFibonacciNumber(previous, oneBeforeThat) {
