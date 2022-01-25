@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# "Deploy"... this doesn't really do anything to push to production
+# but it does make a marker in honeycomb _representing_ a deploy.
+
 source ./.env
 
 sha=$(git rev-parse HEAD)

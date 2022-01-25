@@ -8,50 +8,75 @@ Spoiler: this microservice implements the <a href="https://en.wikipedia.org/wiki
 
 ## What to do
 
-Recommended: [![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/honeycombio/intro-to-o11y-nodejs)
+Recommended: 
+
+[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/honeycombio/intro-to-o11y-nodejs)
 
 Alternative:
 If you like Glitch, you can [remix this app in Glitch](https://glitch.com/edit/#!/intro-to-o11y-nodejs?path=README.md%3A1%3A0).
 
 Alternative: You can also [run locally](#running-locally))
 
-On the home page, click "Go" to see a sequence of numbers appear gradually.
+### Start the app
+
+`./run`
+
+### See the app
+
+Hit the app at http://localhost:3000
+
+Activate the sequence of numbers by pushing **Go**. After you see numbers, push **Stop**. Try this a few times.
+
 Maybe open the browser tools and notice how long each request takes.
 Why does it get slower and slower?
 
 Let's add tracing and find out!
 
-### Autoinstrument
+### Stop the app
+
+Push `Ctrl-C` in the terminal where the app is running.
+
+### Configure tracing to connect to Honeycomb
 
 This project has the tracing configuration set up in tracing.js.
 See that the top line of `index.js` calls into `tracing.js` to activate this.
 
 In `tracing.js`, the code refers to some environment variables.
 
-Set those up in `.env`:
-
-```
-HONEYCOMB_API_KEY=replace-this-with-a-real-api-key
-HONEYCOMB_DATASET=otel-nodejs
-SERVICE_NAME=fibonacci-microservice
-```
-
 Get a Honeycomb API Key from your Team Settings in [Honeycomb](https://ui.honeycomb.io). (find this by clicking on your profile in the lower-left corner.)
+
+Recommended: Copy the example environment:
+
+`cp .env.example .env`
+
+Now edit the contents of `.env` to put in your API key. This file is ignored by git, so you
+won't accidentally commit your API key.
+
+The properties in `.env` are read in when the program starts up.
+
+Alternative: set 
+
+```
+export HONEYCOMB_API_KEY=replace-this-with-a-real-api-key
+export HONEYCOMB_DATASET=hello-observability # can be any name
+export SERVICE_NAME=fib-microsrv # can be any name
+```
+
+Remember, get a Honeycomb API Key from your Team Settings in [Honeycomb](https://ui.honeycomb.io). (find this by clicking on your profile in the lower-left corner.)
 
 You can name the Honeycomb Dataset anything you want.
 
 You can choose any Service Name you want.
 
-Glitch will automatically restart the app. Click "Go" to get the sequence of
-numbers again, and head over to [Honeycomb](https://ui.honeycomb.io) for your data.
+Stop the app, start it again, and click Go and Stop.
 
-How many traces do you see?
+Head over to [Honeycomb](https://ui.honeycomb.io) for your data.
 
-Which ones took the longest?
+Do you see some lines?
 
-What was the 'index' query parameter in the slowest trace?
+Scroll down for Recent Traces. Click into one of those. Do you see some spans?
 
-### Add a custom field
+### Part 3 of the workshop: Add a custom field
 
 Let's make it easier to find that 'index' query parameter.
 
@@ -73,7 +98,7 @@ span.setAttribute("parameter.index", index);
 
 Test the app again, look at the traces, and find the new field you added.
 
-### Add a custom span
+### Advanced: Add a custom span
 
 How long does the real calculation take?
 
@@ -104,8 +129,3 @@ npm run start
 
 Then hit the application locally: http://localhost:3000
 
-If that works, then it's time to set up tracing. A .env file helps. Get one:
-
-`cp .env.example .env`
-
-and [continue with configuring your Honeycomb connection](#autoinstrument).
