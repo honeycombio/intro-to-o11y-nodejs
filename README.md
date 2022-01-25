@@ -8,9 +8,12 @@ Spoiler: this microservice implements the <a href="https://en.wikipedia.org/wiki
 
 ## What to do
 
-Shortest path: [Remix this app in Glitch](https://glitch.com/edit/#!/intro-to-o11y-nodejs?path=README.md%3A1%3A0) so that you can edit it.
+Recommended: [![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/honeycombio/intro-to-o11y-nodejs)
 
-(You can also [run locally](#running-locally)).
+Alternative:
+If you like Glitch, you can [remix this app in Glitch](https://glitch.com/edit/#!/intro-to-o11y-nodejs?path=README.md%3A1%3A0).
+
+Alternative: You can also [run locally](#running-locally))
 
 On the home page, click "Go" to see a sequence of numbers appear gradually.
 Maybe open the browser tools and notice how long each request takes.
