@@ -39,13 +39,10 @@ app.get("/fib", async (req, res) => {
     let minusTwoReturn = JSON.parse(await makeRequest(
       `http://127.0.0.1:3000/fib?index=${index - 2}`
     ));
-    // let span = tracer.startSpan("calculation");
     returnValue = calculateFibonacciNumber(minusOneParsedResponse.fibonacciNumber,
                                            minusTwoReturn.fibonacciNumber);
-    // span.end();
   }
   const returnObject = { fibonacciNumber: returnValue, index: index }
-  // maybe add the return value as a custom attribute too?
   res.send(JSON.stringify(returnObject));
 });
 
