@@ -43,6 +43,7 @@ app.get("/fib", async (req, res) => {
       minusTwoReturn.fibonacciNumber);
   }
 
+  span.setAttribute("app.seqofnum.result.fibonacciNumber", returnValue);
   const returnObject = { fibonacciNumber: returnValue, index: index }
   res.send(JSON.stringify(returnObject));
 });
