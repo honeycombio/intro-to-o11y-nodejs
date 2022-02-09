@@ -44,6 +44,8 @@ function setElementName(e, nameValue) {
   e.setAttributeNode(nameAttribute);
 }
 
+const pauseBetweenRequests = 200; // because otherwise it doesn't work when the backend gets fast
+
 function addNumbersToSequence(startingIndex) {
   const sequenceSpan = document.createElement("span");
   setElementName(sequenceSpan, "sequence-results");
@@ -71,7 +73,7 @@ function addNumbersToSequence(startingIndex) {
         response.json().then(
           n => {
             placeToPutThisNumber.replaceChildren(formatFibonacciNumber(n.fibonacciNumber));
-            addNumbersToSequenceInternal(i + 1);
+            setTimeout(() => addNumbersToSequenceInternal(i + 1), pauseBetweenRequests);
           },
           err => {
             placeToPutThisNumber.replaceChildren(indicateError());
