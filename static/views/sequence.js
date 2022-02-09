@@ -135,10 +135,10 @@ function auto(clickEvent) {
   }
   // OK. Now activate autoMode.
   const stepOne = go;
-  const afterStepOneWaitMs = () => Math.floor(Math.random() * 1000) + 100;
+  const afterStepOneWaitMs = () => Math.floor(Math.random() * 3000) + 1000;
   const stepTwo = stop;
   const afterStepTwoWaitCondition = () => !goButton.disabled
-  const checkEveryMs = 500;
+  const checkEveryMs = 210;
   const repeatCondition = () => autoModeDesired
 
   const doStuff = () => {
