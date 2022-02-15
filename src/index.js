@@ -32,8 +32,8 @@ app.get("/fib", async (req, res) => {
   } else if (index === 1) {
     returnValue = 1;
   } else {
-    let minusOneResponse = await fetchFibonacciNumber(index - 1);
-    let minusTwoResponse = await fetchFibonacciNumber(index - 2);
+    let minusOneResponse = await retrieveFibonacciNumber(index - 1);
+    let minusTwoResponse = await retrieveFibonacciNumber(index - 2);
     returnValue = calculateFibonacciNumber(minusOneResponse.fibonacciNumber,
       minusTwoResponse.fibonacciNumber);
   }
@@ -42,6 +42,16 @@ app.get("/fib", async (req, res) => {
   const returnObject = { fibonacciNumber: returnValue, index: index }
   res.send(JSON.stringify(returnObject));
 });
+
+/**
+ * Retrieve the Fibonacci number either from the cache
+ * or by calling this service for it.
+ * @param {number} index 
+ */
+async function retrieveFibonacciNumber(index) {
+   const result = fetchFibonacciNumber(index);
+   return result;
+}
 
 async function fetchFibonacciNumber(index) {
   const response = await makeRequest(
