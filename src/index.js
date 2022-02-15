@@ -49,8 +49,11 @@ app.get("/fib", async (req, res) => {
  * @param {number} index 
  */
 async function retrieveFibonacciNumber(index) {
-   const result = fetchFibonacciNumber(index);
-   return result;
+  return tracer.startActiveSpan("retrieve fibonacci number", async (span) => {
+    const result = await fetchFibonacciNumber(index);
+    span.end();
+    return result;
+  });
 }
 
 async function fetchFibonacciNumber(index) {
