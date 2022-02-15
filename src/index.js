@@ -32,21 +32,24 @@ app.get("/fib", async (req, res) => {
   } else if (index === 1) {
     returnValue = 1;
   } else {
-    let minusOneResponse = await makeRequest(
-      `http://127.0.0.1:3000/fib?index=${index - 1}`
-    );
-    let minusOneParsedResponse = JSON.parse(minusOneResponse);
-    let minusTwoReturn = JSON.parse(await makeRequest(
-      `http://127.0.0.1:3000/fib?index=${index - 2}`
-    ));
-    returnValue = calculateFibonacciNumber(minusOneParsedResponse.fibonacciNumber,
-      minusTwoReturn.fibonacciNumber);
+    let minusOneResponse = await fetchFibonacciNumber(index - 1);
+    let minusTwoResponse = await fetchFibonacciNumber(index - 2);
+    returnValue = calculateFibonacciNumber(minusOneResponse.fibonacciNumber,
+      minusTwoResponse.fibonacciNumber);
   }
 
   span.setAttribute("app.seqofnum.result.fibonacciNumber", returnValue);
   const returnObject = { fibonacciNumber: returnValue, index: index }
   res.send(JSON.stringify(returnObject));
 });
+
+async function fetchFibonacciNumber(index) {
+  const response = await makeRequest(
+    `http://127.0.0.1:3000/fib?index=${index}`
+  );
+  const result = JSON.parse(response);
+  return result;
+}
 
 function calculateFibonacciNumber(previous, oneBeforeThat) {
   // can you wrap this next line in a custom span?
