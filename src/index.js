@@ -45,6 +45,11 @@ app.get("/fib", async (req, res) => {
 
 const fibonacciCache = new BabyCache();
 
+app.post("/clearCache", (req, res) => {
+  fibonacciCache.clear();
+  res.send("OK");
+})
+
 /**
  * Retrieve the Fibonacci number either from the cache
  * or by calling this service for it.
