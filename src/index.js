@@ -1,6 +1,6 @@
 require("dotenv").config();
 const tracer = require("./tracing")(); // turn on tracing
-
+const BabyCache = require("./cache");
 const express = require("express");
 const http = require("http");
 const opentelemetry = require("@opentelemetry/api");
@@ -43,6 +43,8 @@ app.get("/fib", async (req, res) => {
   res.send(JSON.stringify(returnObject));
 });
 
+const fibonacciCache = new BabyCache();
+
 /**
  * Retrieve the Fibonacci number either from the cache
  * or by calling this service for it.
@@ -50,9 +52,19 @@ app.get("/fib", async (req, res) => {
  */
 async function retrieveFibonacciNumber(index) {
   return tracer.startActiveSpan("retrieve fibonacci number", async (span) => {
-    const result = await fetchFibonacciNumber(index);
+
+    span.setAttribute("app.seqofnum.parameter.index", index);
+    if (fibonacciCache.has(index)) {
+      span.setAttribute("app.seqofnum.cache.hit", true);
+      const result = fibonacciCache.get(index);
+      span.end()
+      return result;
+    }
+    span.setAttribute("app.seqofnum.cache.hit", false);
+    const fetchedResult = await fetchFibonacciNumber(index);
+    fibonacciCache.set(index, fetchedResult);
     span.end();
-    return result;
+    return fetchedResult;
   });
 }
 
