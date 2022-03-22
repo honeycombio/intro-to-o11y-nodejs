@@ -129,3 +129,8 @@ npm run start
 
 Then hit the application locally: http://localhost:3000
 
+# Updating
+
+Check the releases page for [opentelemetry-js](https://github.com/open-telemetry/opentelemetry-js/releases) and [opentelemetry-js-contrib](https://github.com/open-telemetry/opentelemetry-js-contrib/releases) for clues. You can also visit each package's page on [npmjs.com](https://www.npmjs.com/package/@opentelemetry/exporter-trace-otlp-grpc).
+
+Update versions in `package.json` to match, and then try it.
