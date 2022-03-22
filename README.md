@@ -17,7 +17,7 @@ If you like Glitch, you can [remix this app in Glitch](https://glitch.com/edit/#
 
 Alternative: You can also [run locally](#running-locally))
 
-### Start the app
+## Start the app
 
 `./run`
 
@@ -36,7 +36,7 @@ Let's add tracing and find out!
 
 Push `Ctrl-C` in the terminal where the app is running.
 
-### Configure tracing to connect to Honeycomb
+## Configure tracing to connect to Honeycomb
 
 This project has the tracing configuration set up in tracing.js.
 See that the top line of `index.js` calls into `tracing.js` to activate this.
@@ -76,7 +76,7 @@ Do you see some lines?
 
 Scroll down for Recent Traces. Click into one of those. Do you see some spans?
 
-### Part 3 of the workshop: Add a custom field
+## Part 3 of the workshop: Add a custom field
 
 Let's make it easier to find that 'index' query parameter.
 

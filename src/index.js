@@ -23,9 +23,10 @@ app.get("/sequence.js", (req, res) => {
 app.get("/fib", async (req, res) => {
   const index = parseInt(req.query.index);
 
-  const span = opentelemetry.trace.getSpan(opentelemetry.context.active());
-  span.setAttribute("app.seqofnum.parameter.index", index);
-
+  // uncomment 2 lines to add a custom attribute:
+  // const span = otel.trace.getSpan(otel.context.active());
+  // span.setAttribute("parameter.index", index);
+  
   let returnValue = 0;
   if (index === 0) {
     returnValue = 0;
@@ -43,7 +44,7 @@ app.get("/fib", async (req, res) => {
       minusTwoReturn.fibonacciNumber);
   }
 
-  span.setAttribute("app.seqofnum.result.fibonacciNumber", returnValue);
+  // span.setAttribute("app.seqofnum.result.fibonacciNumber", returnValue);
   const returnObject = { fibonacciNumber: returnValue, index: index }
   res.send(JSON.stringify(returnObject));
 });
