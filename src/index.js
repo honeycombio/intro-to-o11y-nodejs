@@ -3,7 +3,7 @@ const tracer = require("./tracing")(); // turn on tracing
 
 const express = require("express");
 const http = require("http");
-const opentelemetry = require("@opentelemetry/api");
+const otel = require("@opentelemetry/api");
 const path = require("path");
 const app = express();
 
@@ -26,7 +26,7 @@ app.get("/fib", async (req, res) => {
   // uncomment 2 lines to add a custom attribute:
   // const span = otel.trace.getSpan(otel.context.active());
   // span.setAttribute("parameter.index", index);
-  
+
   let returnValue = 0;
   if (index === 0) {
     returnValue = 0;
