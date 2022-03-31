@@ -23,20 +23,19 @@ const { SemanticResourceAttributes } = require('@opentelemetry/semantic-conventi
 
 module.exports = () => {
   // set log level to DEBUG for a lot of output
-opentelemetry.diag.setLogger(new opentelemetry.DiagConsoleLogger(), opentelemetry.DiagLogLevel.INFO);
-
+  opentelemetry.diag.setLogger(new opentelemetry.DiagConsoleLogger(), opentelemetry.DiagLogLevel.INFO);
+  
+  const apikey = process.env.HONEYCOMB_API_KEY;
+  const serviceName = process.env.SERVICE_NAME || 'sequence-of-numbers';
+  console.log(`Exporting to Honeycomb with APIKEY <${apikey}> and service name ${serviceName}`)
+  
   const provider = new NodeTracerProvider({
     resource: new Resource({
-      [SemanticResourceAttributes.SERVICE_NAME]: process.env.SERVICE_NAME || 'fibonacci-microservice',
+      [SemanticResourceAttributes.SERVICE_NAME]: serviceName
     }),
   });
-
   const metadata = new grpc.Metadata();
-  const apikey = process.env.HONEYCOMB_API_KEY;
-  const dataset = process.env.HONEYCOMB_DATASET || "otel-nodejs";
-  console.log(`Exporting to Honeycomb with APIKEY <${apikey}> and dataset ${dataset}`)
   metadata.set("x-honeycomb-team", apikey);
-  metadata.set("x-honeycomb-dataset", dataset);
   const creds = grpc.credentials.createSsl();
   provider.addSpanProcessor(
     new BatchSpanProcessor(
@@ -58,7 +57,7 @@ opentelemetry.diag.setLogger(new opentelemetry.DiagConsoleLogger(), opentelemetr
     tracerProvider: provider,
     instrumentations: [new HttpInstrumentation(), new ExpressInstrumentation()]
   });
-  
+
   process.on("SIGINT", async () => {
     console.log("Flushing telemetry");
     await provider.activeSpanProcessor.forceFlush();

@@ -58,19 +58,17 @@ Alternative: set
 
 ```
 export HONEYCOMB_API_KEY=replace-this-with-a-real-api-key
-export HONEYCOMB_DATASET=hello-observability # can be any name
-export SERVICE_NAME=fib-microsrv # can be any name
+export SERVICE_NAME=sequence-of-numbers # can be any name
 ```
 
 Remember, get a Honeycomb API Key from your Team Settings in [Honeycomb](https://ui.honeycomb.io). (find this by clicking on your profile in the lower-left corner.)
-
-You can name the Honeycomb Dataset anything you want.
 
 You can choose any Service Name you want.
 
 Stop the app, start it again, and click Go and Stop.
 
-Head over to [Honeycomb](https://ui.honeycomb.io) for your data.
+Head over to [Honeycomb](https://ui.honeycomb.io) for your data. Try clicking "Home" in the top left.
+Where the dropdown says "All datasets in prod" (or whatever you named your environment), choose your service name.
 
 Do you see some lines?
 
