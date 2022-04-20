@@ -7,11 +7,11 @@ source ./.env
 
 sha=$(git rev-parse HEAD)
 
-echo "Dataset: $HONEYCOMB_DATASET"
+echo "Dataset: $SERVICE_NAME"
 echo "Current SHA: " $sha
 
 # this creates a deploy marker in Honeycomb
 
-curl https://api.honeycomb.io/1/markers/$HONEYCOMB_DATASET -X POST  \
+curl https://api.honeycomb.io/1/markers/$SERVICE_NAME -X POST  \
     -H "X-Honeycomb-Team: $HONEYCOMB_API_KEY"  \
     -d "{\"message\":\"commit $sha\", \"type\":\"deploy\"}"
