@@ -6,6 +6,7 @@ const http = require("http");
 const opentelemetry = require("@opentelemetry/api");
 const path = require("path");
 const app = express();
+const GoodEnoughCache = require("./cache")
 
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "/../static/views/index.html"));
@@ -24,7 +25,7 @@ app.get("/fib", async (req, res) => {
   const index = parseInt(req.query.index);
 
   const span = opentelemetry.trace.getSpan(opentelemetry.context.active());
-  span.setAttribute("app.seqofnum.parameter.index", index);
+  span.setAttribute("app.parameter.index", index);
 
   let returnValue = 0;
   if (index === 0) {
@@ -32,16 +33,26 @@ app.get("/fib", async (req, res) => {
   } else if (index === 1) {
     returnValue = 1;
   } else {
-    let minusOneResponse = await fetchFibonacciNumber(index - 1);
-    let minusTwoResponse = await fetchFibonacciNumber(index - 2);
+    let minusOneResponse = await retrieveFibonacciNumber(index - 1);
+    let minusTwoResponse = await retrieveFibonacciNumber(index - 2);
     returnValue = calculateFibonacciNumber(minusOneResponse.fibonacciNumber,
       minusTwoResponse.fibonacciNumber);
   }
 
-  span.setAttribute("app.seqofnum.result.fibonacciNumber", returnValue);
+  span.setAttribute("app.result.fibonacciNumber", returnValue);
   const returnObject = { fibonacciNumber: returnValue, index: index }
   res.send(JSON.stringify(returnObject));
 });
+
+const cache = new GoodEnoughCache();
+async function retrieveFibonacciNumber(index) {
+  if (cache.has(index)) {
+    return cache.get(index);
+  }
+  const result = fetchFibonacciNumber(index)
+  cache.set(index, result);
+  return result;
+}
 
 async function fetchFibonacciNumber(index) {
   const response = await makeRequest(
