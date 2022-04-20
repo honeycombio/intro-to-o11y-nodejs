@@ -25,18 +25,17 @@ module.exports = () => {
   // set log level to DEBUG for a lot of output
 opentelemetry.diag.setLogger(new opentelemetry.DiagConsoleLogger(), opentelemetry.DiagLogLevel.INFO);
 
+  const serviceName = process.env.SERVICE_NAME || 'fibonacci-microservice';
   const provider = new NodeTracerProvider({
     resource: new Resource({
-      [SemanticResourceAttributes.SERVICE_NAME]: process.env.SERVICE_NAME || 'fibonacci-microservice',
+      [SemanticResourceAttributes.SERVICE_NAME]: serviceName,
     }),
   });
 
   const metadata = new grpc.Metadata();
   const apikey = process.env.HONEYCOMB_API_KEY;
-  const dataset = process.env.HONEYCOMB_DATASET || "otel-nodejs";
-  console.log(`Exporting to Honeycomb with APIKEY <${apikey}> and dataset ${dataset}`)
+  console.log(`Exporting to Honeycomb with APIKEY <${apikey}> and dataset ${serviceName}`)
   metadata.set("x-honeycomb-team", apikey);
-  metadata.set("x-honeycomb-dataset", dataset);
   const creds = grpc.credentials.createSsl();
   provider.addSpanProcessor(
     new BatchSpanProcessor(
