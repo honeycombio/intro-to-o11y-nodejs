@@ -1,5 +1,5 @@
 require("dotenv").config();
-const tracer = require("./tracing")(); // turn on tracing
+require("./tracing")(); // turn on tracing
 
 const express = require("express");
 const http = require("http");
@@ -33,8 +33,8 @@ app.get("/fib", async (req, res) => {
   } else if (index === 1) {
     returnValue = 1;
   } else {
-    let minusOneResponse = await retrieveFibonacciNumber(index - 1);
-    let minusTwoResponse = await retrieveFibonacciNumber(index - 2);
+    let minusOneResponse = await fetchFibonacciNumber(index - 1);
+    let minusTwoResponse = await fetchFibonacciNumber(index - 2);
     returnValue = calculateFibonacciNumber(minusOneResponse.fibonacciNumber,
       minusTwoResponse.fibonacciNumber);
   }
@@ -43,16 +43,6 @@ app.get("/fib", async (req, res) => {
   const returnObject = { fibonacciNumber: returnValue, index: index }
   res.send(JSON.stringify(returnObject));
 });
-
-const cache = new GoodEnoughCache();
-async function retrieveFibonacciNumber(index) {
-  if (cache.has(index)) {
-    return cache.get(index);
-  }
-  const result = fetchFibonacciNumber(index)
-  cache.set(index, result);
-  return result;
-}
 
 async function fetchFibonacciNumber(index) {
   const response = await makeRequest(
