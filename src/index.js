@@ -33,8 +33,8 @@ app.get("/fib", async (req, res) => {
   } else if (index === 1) {
     returnValue = 1;
   } else {
-    let minusOneResponse = await fetchFibonacciNumber(index - 1);
-    let minusTwoResponse = await fetchFibonacciNumber(index - 2);
+    let minusOneResponse = await retrieveFibonacciNumber(index - 1);
+    let minusTwoResponse = await retrieveFibonacciNumber(index - 2);
     returnValue = calculateFibonacciNumber(minusOneResponse.fibonacciNumber,
       minusTwoResponse.fibonacciNumber);
   }
@@ -43,6 +43,27 @@ app.get("/fib", async (req, res) => {
   const returnObject = { fibonacciNumber: returnValue, index: index }
   res.send(JSON.stringify(returnObject));
 });
+
+const cache = new GoodEnoughCache();
+const tracer = opentelemetry.trace.getTracer("sequence-of-numbers");
+
+async function retrieveFibonacciNumber(index) {
+  return tracer.startActiveSpan("retrieveFibonacciNumber", async (span) => {
+    span.setAttribute("app.parameter.index", index);
+    var result;
+    if (cache.has(index)) {
+      span.setAttribute("app.cache.hit", true);
+      result = cache.get(index);
+    } else {
+      span.setAttribute("app.cache.hit", false);
+      result = await fetchFibonacciNumber(index);
+      cache.set(index, result);
+    }
+    span.setAttribute("app.result", JSON.stringify(result));
+    span.end();
+    return result;
+  });
+}
 
 async function fetchFibonacciNumber(index) {
   const response = await makeRequest(
