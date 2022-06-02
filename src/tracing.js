@@ -21,7 +21,6 @@ const grpc = require("@grpc/grpc-js");
 const { Resource } = require('@opentelemetry/resources');
 const { SemanticResourceAttributes } = require('@opentelemetry/semantic-conventions');
 
-module.exports = () => {
   // set log level to DEBUG for a lot of output
   opentelemetry.diag.setLogger(new opentelemetry.DiagConsoleLogger(), opentelemetry.DiagLogLevel.INFO);
   
@@ -64,9 +63,3 @@ module.exports = () => {
     console.log("Flushed");
     process.exit();
   });
-
-  const tracer = opentelemetry.trace.getTracer(
-    process.env.SERVICE_NAME || "fibonacci-microservice"
-  );
-  return tracer;
-};

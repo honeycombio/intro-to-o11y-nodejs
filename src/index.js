@@ -1,5 +1,3 @@
-require("dotenv").config();
-const tracer = require("./tracing")(); // turn on tracing
 
 const express = require("express");
 const http = require("http");
@@ -24,8 +22,8 @@ app.get("/fib", async (req, res) => {
   const index = parseInt(req.query.index);
 
   // uncomment 2 lines to add a custom attribute:
-  // const span = otel.trace.getSpan(otel.context.active());
-  // span.setAttribute("parameter.index", index);
+  const span = otel.trace.getSpan(otel.context.active());
+  span.setAttribute("parameter.index", index);
 
   let returnValue = 0;
   if (index === 0) {
