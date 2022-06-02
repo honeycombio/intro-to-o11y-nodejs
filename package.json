@@ -19,7 +19,6 @@
     "@opentelemetry/sdk-trace-base": "^1.1.1",
     "@opentelemetry/sdk-trace-node": "^1.1.1",
     "@opentelemetry/semantic-conventions": "^1.1.0",
-    "dotenv": "^10.0.0",
     "express": "^4.17.3"
   },
   "engines": {
