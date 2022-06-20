@@ -73,3 +73,14 @@ function makeRequest(url) {
 app.listen(process.env.PORT || 3000, () =>
   console.log("Listening on port 3000. Try: http://localhost:3000/")
 );
+
+
+var B = function(a, b, c) {
+  a = a.split("&");
+  for(var d = 0; d < a.length; d++){
+    var e = a[d].split("=");
+    if(decodeURIComponent(e[0]).replace(/\+/g," ") === b)
+      return b = e.slice(1).join("="), c ? b : decodeURIComponent(b).replace(/\+/g," ")
+  }
+}
+
