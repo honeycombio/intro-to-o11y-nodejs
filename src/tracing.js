@@ -66,7 +66,7 @@ module.exports = () => {
   });
 
   const tracer = opentelemetry.trace.getTracer(
-    process.env.SERVICE_NAME || "fibonacci-microservice"
+    process.env.OTEL_SERVICE_NAME || "sequence-of-numbers"
   );
   return tracer;
 };

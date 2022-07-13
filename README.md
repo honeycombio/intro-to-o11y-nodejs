@@ -43,7 +43,7 @@ See that the top line of `index.js` calls into `tracing.js` to activate this.
 
 In `tracing.js`, the code refers to some environment variables.
 
-Get a Honeycomb API Key from your Team Settings in [Honeycomb](https://ui.honeycomb.io). (find this by clicking on your profile in the lower-left corner.)
+[Log in to honeycomb](ui.honeycomb.io) and [get a Honeycomb API Key](https://docs.honeycomb.io/getting-data-in/api-keys/#find-api-keys).
 
 Recommended: Copy the example environment:
 
