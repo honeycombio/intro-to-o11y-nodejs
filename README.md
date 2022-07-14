@@ -58,10 +58,10 @@ Alternative: set
 
 ```
 export HONEYCOMB_API_KEY=replace-this-with-a-real-api-key
-export SERVICE_NAME=sequence-of-numbers # can be any name
+export OTEL_SERVICE_NAME=sequence-of-numbers # can be any name
 ```
 
-Remember, get a Honeycomb API Key from your Team Settings in [Honeycomb](https://ui.honeycomb.io). (find this by clicking on your profile in the lower-left corner.)
+Remember to [Log in to honeycomb](ui.honeycomb.io) and [get a Honeycomb API Key](https://docs.honeycomb.io/getting-data-in/api-keys/#find-api-keys).
 
 You can choose any Service Name you want.
 
