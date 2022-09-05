@@ -71,6 +71,10 @@ module.exports = () => {
 function sendToJaeger(provider) {
 
   const jaegerLocation = process.env["JAEGER_LOCATION"]
+  if(!jaegerLocation) {
+    console.log("To send to Jaeger, set JAEGER_LOCATION to an IP address or domain");
+    return;
+  }
   console.log(
     `Exporting to Jaeger at <${jaegerLocation}>`
   );
@@ -94,6 +98,10 @@ function sendToJaeger(provider) {
 function sendToHoneycomb(provider) {
 
   const apikey = process.env.HONEYCOMB_API_KEY;
+  if (!apikey) {
+    console.log("To send to Honeycomb, set HONEYCOMB_API_KEY");
+    return;
+  }
   console.log(
     `Exporting to Honeycomb with APIKEY <${apikey}>`
   );
