@@ -25,43 +25,26 @@ const {
 } = require("@opentelemetry/semantic-conventions");
 
 module.exports = () => {
-  // set log level to DEBUG for a lot of output
+  // If you're having trouble getting tracing to work, then set log level to DEBUG for a lot of output
   opentelemetry.diag.setLogger(
     new opentelemetry.DiagConsoleLogger(),
     opentelemetry.DiagLogLevel.INFO
   );
 
-  const apikey = process.env.HONEYCOMB_API_KEY;
-  const serviceName = process.env.SERVICE_NAME || "sequence-of-numbers";
-  console.log(
-    `Exporting to Honeycomb with APIKEY <${apikey}> and service name ${serviceName}`
-  );
+  const serviceName = process.env.OTEL_SERVICE_NAME || "sequence-of-numbers";
+  console.log("Sending traces as service: " + serviceName)
 
   const provider = new NodeTracerProvider({
     resource: new Resource({
       [SemanticResourceAttributes.SERVICE_NAME]: serviceName,
     }),
   });
-  const metadata = new grpc.Metadata();
-  metadata.set("x-honeycomb-team", apikey);
-  const creds = grpc.credentials.createSsl();
-  provider.addSpanProcessor(
-    new BatchSpanProcessor(
-      new OTLPTraceExporter({
-        url: "grpc://api.honeycomb.io:443/",
-        credentials: creds,
-        metadata,
-      }),
-      {
-        scheduledDelayMillis: 500,
-        maxQueueSize: 16000,
-        maxExportBatchSize: 1000,
-      }
-    )
-  );
-
+  
   // uncomment this to see traces in stdout
-  //provider.addSpanProcessor(new BatchSpanProcessor(new ConsoleSpanExporter()));
+  //provider.addSpanProcessor(new SimpleSpanProcessor(new ConsoleSpanExporter()));
+
+  sendToHoneycomb(provider);
+  sendToJaeger(provider);
 
   provider.register();
 
@@ -79,8 +62,58 @@ module.exports = () => {
   });
 
   const tracer = opentelemetry.trace.getTracer(
-    process.env.OTEL_SERVICE_NAME || "sequence-of-numbers"
+    "sequence-of-numbers"
   );
 
   return tracer;
 };
+
+function sendToJaeger(provider) {
+
+  const jaegerLocation = process.env["JAEGER_LOCATION"]
+  console.log(
+    `Exporting to Jaeger at <${jaegerLocation}>`
+  );
+  
+  provider.addSpanProcessor(
+    new BatchSpanProcessor(
+      new OTLPTraceExporter({
+        url: `http://${jaegerLocation}:4317`,
+        credentials: grpc.credentials.createInsecure(),
+      }),
+      // override the defaults; spend more network and memory on telemetry
+      {
+        scheduledDelayMillis: 500,
+        maxQueueSize: 16000,
+        maxExportBatchSize: 1000,
+      }
+    )
+  );
+}
+
+function sendToHoneycomb(provider) {
+
+  const apikey = process.env.HONEYCOMB_API_KEY;
+  console.log(
+    `Exporting to Honeycomb with APIKEY <${apikey}>`
+  );
+  
+  const metadata = new grpc.Metadata();
+  metadata.set("x-honeycomb-team", apikey);
+
+  provider.addSpanProcessor(
+    new BatchSpanProcessor(
+      new OTLPTraceExporter({
+        url: "https://api.honeycomb.io:443/",
+        credentials: grpc.credentials.createSsl(),
+        metadata,
+      }),
+      // override the defaults; spend more network and memory on telemetry
+      {
+        scheduledDelayMillis: 500,
+        maxQueueSize: 16000,
+        maxExportBatchSize: 1000,
+      }
+    )
+  );
+}
