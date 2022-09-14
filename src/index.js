@@ -1,11 +1,16 @@
 require("dotenv").config();
-const tracer = require("./tracing")(); // turn on tracing
 
 const express = require("express");
 const http = require("http");
 const otel = require("@opentelemetry/api");
 const path = require("path");
 const app = express();
+
+// Uncomment this to create new spans yourself!
+//
+// const tracer = otel.trace.getTracer(
+//   process.env.OTEL_SERVICE_NAME || "sequence-of-numbers"
+// );
 
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "/../static/views/index.html"));
@@ -24,7 +29,7 @@ app.get("/fib", async (req, res) => {
   const index = parseInt(req.query.index);
 
   // uncomment 2 lines to add a custom attribute:
-  // const span = otel.trace.getSpan(otel.context.active());
+  // const span = otel.trace.getActiveSpan();
   // span.setAttribute("parameter.index", index);
 
   let returnValue = 0;

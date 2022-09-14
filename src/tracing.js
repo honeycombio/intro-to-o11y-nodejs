@@ -24,63 +24,55 @@ const {
   SemanticResourceAttributes,
 } = require("@opentelemetry/semantic-conventions");
 
-module.exports = () => {
-  // set log level to DEBUG for a lot of output
-  opentelemetry.diag.setLogger(
-    new opentelemetry.DiagConsoleLogger(),
-    opentelemetry.DiagLogLevel.INFO
-  );
+// set log level to DEBUG for a lot of output
+opentelemetry.diag.setLogger(
+  new opentelemetry.DiagConsoleLogger(),
+  opentelemetry.DiagLogLevel.INFO
+);
 
-  const apikey = process.env.HONEYCOMB_API_KEY;
-  const serviceName = process.env.SERVICE_NAME || "sequence-of-numbers";
-  console.log(
-    `Exporting to Honeycomb with APIKEY <${apikey}> and service name ${serviceName}`
-  );
+const apikey = process.env.HONEYCOMB_API_KEY;
+const serviceName = process.env.SERVICE_NAME || "sequence-of-numbers";
+console.log(
+  `Exporting to Honeycomb with APIKEY <${apikey}> and service name ${serviceName}`
+);
 
-  const provider = new NodeTracerProvider({
-    resource: new Resource({
-      [SemanticResourceAttributes.SERVICE_NAME]: serviceName,
+const provider = new NodeTracerProvider({
+  resource: new Resource({
+    [SemanticResourceAttributes.SERVICE_NAME]: serviceName,
+  }),
+});
+const metadata = new grpc.Metadata();
+metadata.set("x-honeycomb-team", apikey);
+const creds = grpc.credentials.createSsl();
+provider.addSpanProcessor(
+  new BatchSpanProcessor(
+    new OTLPTraceExporter({
+      url: "grpc://api.honeycomb.io:443/",
+      credentials: creds,
+      metadata,
     }),
-  });
-  const metadata = new grpc.Metadata();
-  metadata.set("x-honeycomb-team", apikey);
-  const creds = grpc.credentials.createSsl();
-  provider.addSpanProcessor(
-    new BatchSpanProcessor(
-      new OTLPTraceExporter({
-        url: "grpc://api.honeycomb.io:443/",
-        credentials: creds,
-        metadata,
-      }),
-      {
-        scheduledDelayMillis: 500,
-        maxQueueSize: 16000,
-        maxExportBatchSize: 1000,
-      }
-    )
-  );
+    {
+      scheduledDelayMillis: 500,
+      maxQueueSize: 16000,
+      maxExportBatchSize: 1000,
+    }
+  )
+);
 
-  // uncomment this to see traces in stdout
-  //provider.addSpanProcessor(new BatchSpanProcessor(new ConsoleSpanExporter()));
+// uncomment this to see traces in stdout
+// provider.addSpanProcessor(new SimpleSpanProcessor(new ConsoleSpanExporter()));
 
-  provider.register();
+provider.register();
 
-  // turn on autoinstrumentation for traces you're likely to want
-  registerInstrumentations({
-    tracerProvider: provider,
-    instrumentations: [new HttpInstrumentation(), new ExpressInstrumentation()],
-  });
+// turn on autoinstrumentation for traces you're likely to want
+registerInstrumentations({
+  tracerProvider: provider,
+  instrumentations: [new HttpInstrumentation(), new ExpressInstrumentation()],
+});
 
-  process.on("SIGINT", async () => {
-    console.log("Flushing telemetry");
-    await provider.activeSpanProcessor.forceFlush();
-    console.log("Flushed");
-    process.exit();
-  });
-
-  const tracer = opentelemetry.trace.getTracer(
-    process.env.OTEL_SERVICE_NAME || "sequence-of-numbers"
-  );
-
-  return tracer;
-};
+process.on("SIGINT", async () => {
+  console.log("Flushing telemetry");
+  await provider.activeSpanProcessor.forceFlush();
+  console.log("Flushed");
+  process.exit();
+});
