@@ -60,7 +60,7 @@ provider.addSpanProcessor(
 );
 
 // uncomment this to see traces in stdout
-// provider.addSpanProcessor(new SimpleSpanProcessor(new ConsoleSpanExporter()));
+// provider.addSpanProcessor(new BatchSpanProcessor(new ConsoleSpanExporter()));
 
 provider.register();
 
