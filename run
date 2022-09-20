@@ -1,2 +1,3 @@
 npm install
+source .env || echo "Consider creating a .env (use .env.example as a template)"
 npm run start
