@@ -31,7 +31,7 @@ opentelemetry.diag.setLogger(
 );
 
 const apikey = process.env.HONEYCOMB_API_KEY;
-const serviceName = process.env.SERVICE_NAME || "sequence-of-numbers";
+const serviceName = process.env.OTEL_SERVICE_NAME || "sequence-of-numbers";
 console.log(
   `Exporting to Honeycomb with APIKEY <${apikey}> and service name ${serviceName}`
 );

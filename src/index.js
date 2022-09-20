@@ -7,7 +7,7 @@ const app = express();
 // Uncomment this to create new spans yourself!
 //
 // const tracer = otel.trace.getTracer(
-//   process.env.OTEL_SERVICE_NAME || "sequence-of-numbers"
+//  "custom tracing"
 // );
 
 app.get("/", (req, res) => {
