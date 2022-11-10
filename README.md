@@ -1,10 +1,10 @@
 # Intro to Observability: Demo in Node.js
 
-This Node.js application is here for you to try out tracing.
+This Node.js application is here for you to try out tracing with Honeycomb.
 It consists of a microservice that calls itself,
 so you can simulate a whole microservice ecosystem with just one service!
 
-Spoiler: this microservice implements the <a href="https://en.wikipedia.org/wiki/Fibonacci_number">Fibonacci sequence</a>.
+Spoiler: this microservice implements the [Fibonacci sequence](https://en.wikipedia.org/wiki/Fibonacci_number).
 
 ## What to do
 
@@ -12,10 +12,9 @@ Recommended:
 
 [![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/honeycombio/intro-to-o11y-nodejs)
 
-Alternative:
-If you like Glitch, you can [remix this app in Glitch](https://glitch.com/edit/#!/intro-to-o11y-nodejs?path=README.md%3A1%3A0).
+Gitpod is a free cloud environment where you can run the example without needing to clone the code or install Go on your machine.
 
-Alternative: You can also [run locally](#running-locally))
+You can also [run the app locally](#running-locally).
 
 ## Start the app
 
@@ -23,9 +22,17 @@ Alternative: You can also [run locally](#running-locally))
 
 ### See the app
 
-Hit the app at http://localhost:3000
+If you are running the app in Gitpod, navigate to the "Ports" tab and click the address for port 3000 to open the app in a new tab:
 
-Activate the sequence of numbers by pushing **Go**. After you see numbers, push **Stop**. Try this a few times.
+![Gitpod open address](img/gitpod-ports-js.png "Gitpod open address")
+
+If you are running locally, access the app at [http://localhost:3000](http://localhost:3000)
+
+Activate the sequence of numbers by selecting the **Go** button in the app.
+
+After the app displays numbers, select **Stop**.
+
+Try this a few times.
 
 Maybe open the browser tools and notice how long each request takes.
 Why does it get slower and slower?
@@ -43,38 +50,31 @@ See that the top line of `index.js` calls into `tracing.js` to activate this.
 
 In `tracing.js`, the code refers to some environment variables.
 
+You'll configure the app to send traces to Honeycomb by setting an `HONEYCOMB_API_KEY` environment variable.
+
 [Log in to honeycomb](ui.honeycomb.io) and [get a Honeycomb API Key](https://docs.honeycomb.io/getting-data-in/api-keys/#find-api-keys).
 
-Recommended: Copy the example environment:
+The repo comes with an example env file you can copy to get started:
 
 `cp .env.example .env`
 
 Now edit the contents of `.env` to put in your API key. This file is ignored by git, so you
 won't accidentally commit your API key.
 
-The properties in `.env` are read in when the program starts up.
-
-Alternative: set 
-
 ```
-export HONEYCOMB_API_KEY=replace-this-with-a-real-api-key
-export OTEL_SERVICE_NAME=sequence-of-numbers # can be any name
+export HONEYCOMB_API_KEY=<replace-this-with-a-real-api-key>
 ```
-
-Remember to [Log in to honeycomb](ui.honeycomb.io) and [get a Honeycomb API Key](https://docs.honeycomb.io/getting-data-in/api-keys/#find-api-keys).
-
-You can choose any Service Name you want.
 
 Stop the app, start it again, and click Go and Stop.
 
 Head over to [Honeycomb](https://ui.honeycomb.io) for your data. Try clicking "Home" in the top left.
-Where the dropdown says "All datasets in prod" (or whatever you named your environment), choose your service name.
+Where the dropdown says "All datasets in prod" (or whatever you named your environment), choose the `sequence-of-numbers` service.
 
 Do you see some lines?
 
 Scroll down for Recent Traces. Click into one of those. Do you see some spans?
 
-## Part 3 of the workshop: Add a custom field
+## Part 2 of the workshop: Add a custom field
 
 Let's make it easier to find that 'index' query parameter.
 
