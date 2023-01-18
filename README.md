@@ -8,7 +8,7 @@ Spoiler: this microservice implements the [Fibonacci sequence](https://en.wikipe
 
 ## What to do
 
-Recommended: 
+Recommended:
 
 [![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/honeycombio/intro-to-o11y-nodejs)
 
@@ -22,11 +22,11 @@ You can also [run the app locally](#running-locally).
 
 ### See the app
 
-If you are running the app in Gitpod, navigate to the "Ports" tab and click the address for port 3000 to open the app in a new tab:
+If you are running the app in Gitpod, navigate to the "Ports" tab and click the address for port 3001 to open the app in a new tab:
 
 ![Gitpod open address](img/gitpod-ports-js.png "Gitpod open address")
 
-If you are running locally, access the app at [http://localhost:3000](http://localhost:3000)
+If you are running locally, access the app at [http://localhost:3001](http://localhost:3001)
 
 Activate the sequence of numbers by selecting the **Go** button in the app.
 
@@ -125,7 +125,7 @@ npm install
 npm run start
 ```
 
-Then hit the application locally: http://localhost:3000
+Then hit the application locally: http://localhost:3001
 
 # Updating
 
