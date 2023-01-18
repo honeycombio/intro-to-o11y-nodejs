@@ -4,6 +4,8 @@ const otel = require("@opentelemetry/api");
 const path = require("path");
 const app = express();
 
+const port_number = 3001; // I'd rather use 3000 but Apple did something in Big Sur that keeps that port busy
+
 // Uncomment this to create new spans yourself!
 //
 // const tracer = otel.trace.getTracer(
@@ -30,6 +32,7 @@ app.get("/fib", async (req, res) => {
   // const span = otel.trace.getActiveSpan();
   // span.setAttribute("parameter.index", index);
 
+
   let returnValue = 0;
   if (index === 0) {
     returnValue = 0;
@@ -37,11 +40,11 @@ app.get("/fib", async (req, res) => {
     returnValue = 1;
   } else {
     let minusOneResponse = await makeRequest(
-      `http://127.0.0.1:3000/fib?index=${index - 1}`
+      `http://127.0.0.1:${port_number}/fib?index=${index - 1}`
     );
     let minusOneParsedResponse = JSON.parse(minusOneResponse);
     let minusTwoReturn = JSON.parse(await makeRequest(
-      `http://127.0.0.1:3000/fib?index=${index - 2}`
+      `http://127.0.0.1:${port_number}/fib?index=${index - 2}`
     ));
     returnValue = calculateFibonacciNumber(minusOneParsedResponse.fibonacciNumber,
       minusTwoReturn.fibonacciNumber);
@@ -75,6 +78,6 @@ function makeRequest(url) {
   });
 }
 
-app.listen(process.env.PORT || 3000, () =>
-  console.log("Listening on port 3000. Try: http://localhost:3000/")
+app.listen(process.env.PORT || port_number, () =>
+  console.log(`Listening on port_number ${port_number}. Try: http://localhost:${port_number}/`)
 );
