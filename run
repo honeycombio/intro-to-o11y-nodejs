@@ -1,3 +1,13 @@
+#!/bin/bash
+
+if [ ! -f ".env" ]
+then
+  echo "Creating .env -- update it with your API key!"
+  cp .env.example .env
+fi
+
 npm install
-source .env || echo "Consider creating a .env (use .env.example as a template)"
-npm run start
+
+source .env
+
+npm run really-start

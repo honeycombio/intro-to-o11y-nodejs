@@ -4,7 +4,8 @@
   "description": "A simple Node app built on Express using OpenTelemetry",
   "main": "src/index.js",
   "scripts": {
-    "start": "node -r ./src/tracing.js ./src/index.js",
+    "really-start": "node -r ./src/tracing.js ./src/index.js",
+    "start": "./run",
     "metrics": ". ./.env && HNY_API_KEY=$HONEYCOMB_API_KEY HNY_DATASET=otel-nodejs-host-metrics ./otelcol_hny_linux_amd64 --config honeycomb-metrics-config.yaml"
   },
   "dependencies": {
