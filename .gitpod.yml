@@ -1,0 +1,3 @@
+tasks:
+  - init: echo "Hello"
+    command: echo "Start the app with './run'"
