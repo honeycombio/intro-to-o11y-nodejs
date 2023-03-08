@@ -93,14 +93,3 @@ registerInstrumentations({
   tracerProvider: provider,
   instrumentations: [new HttpInstrumentation(), new ExpressInstrumentation()],
 });
-
-process.on("SIGINT", async () => {
-  console.log("Flushing telemetry");
-  await provider.activeSpanProcessor.forceFlush();
-  console.log("Flushed");
-  process.exit();
-});
-
-
-
-sdk.start()
