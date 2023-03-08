@@ -11,6 +11,7 @@
   "dependencies": {
     "@honeycombio/opentelemetry-node": "^0.1.2-beta",
     "@opentelemetry/auto-instrumentations-node": "^0.35.0",
+    "@opentelemetry/sdk-node": "^0.35.1",
     "express": "^4.17.3"
   },
   "license": "MIT",
