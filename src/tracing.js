@@ -61,19 +61,17 @@ opentelemetry.diag.setLogger(
 const apikey = process.env.HONEYCOMB_API_KEY;
 const metadata = new grpc.Metadata();
 metadata.set("x-honeycomb-team", apikey);
+const sendToHoneycombOverGrpc = new OTLPTraceExporter({
+  url: "grpc://api.honeycomb.io:443/",
+  credentials: grpc.credentials.createSsl(),
+  metadata,
+});
 
-const sendBatchesToHoneycomb = new BatchSpanProcessor(
-  new OTLPTraceExporter({
-    url: "grpc://api.honeycomb.io:443/",
-    credentials: grpc.credentials.createSsl(),
-    metadata,
-  }),
-  {
-    scheduledDelayMillis: 500,
-    maxQueueSize: 16000,
-    maxExportBatchSize: 1000,
-  }
-);
+const sendBatchesToHoneycomb = new BatchSpanProcessor(sendToHoneycombOverGrpc, {
+  scheduledDelayMillis: 500,
+  maxQueueSize: 16000,
+  maxExportBatchSize: 1000,
+});
 
 const sdk = new NodeSDK({
   spanProcessor: sendBatchesToHoneycomb,
