@@ -12,7 +12,19 @@ const port_number = 3001; // I'd rather use 3000 but Apple did something in Big 
 //  "custom tracing"
 // );
 
+const rootContext = otel.context.active(); // save the root context, outside of any autoinstrumentation
+
 app.get("/", (req, res) => {
+  // TROUBLESHOOTING: print out the Trace ID, Span ID, and Trace Flags of the current span.
+  // look at the trace ID. is it 0? That means the SDK has not initialized. We want trace flags to be 1.
+  // look at the trace flags. Is it all 0s? That means it will not create spans, because this is not sampled.
+  console.log("TROUBLESHOOTING: in route, the span context is: " + JSON.stringify(otel.trace.getActiveSpan().spanContext()));
+
+  // TROUBLESHOOTING: create a new span in the root context, and end it.
+  // this is the "hello world" of tracing.
+  // query by 'library.name' to see the 'custom tracer for test' value.
+  otel.trace.getTracer("custom tracer for test").startSpan("test span", {}, rootContext).end();
+
   res.sendFile(path.join(__dirname, "/../static/views/index.html"));
 });
 app.get("/favicon.png", (req, res) => {
