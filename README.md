@@ -1,4 +1,8 @@
-# Intro to Observability: Demo in Node.js
+# Intro to Observability: Demo in Node.js - DEPRECATED
+
+DEPRECATED - Please prefer the Meminator application as an example: https://github.com/honeycombio/meminator-workshop/
+
+##Former Description
 
 This Node.js application is here for you to try out tracing with Honeycomb.
 It consists of a microservice that calls itself,
